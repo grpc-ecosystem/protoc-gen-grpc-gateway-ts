@@ -24,6 +24,17 @@ type File struct {
 	TSFileName string
 }
 
+// NeedsOneOfSupport indicates the file needs one of support type utilities
+func (f *File) NeedsOneOfSupport() bool {
+	for _, m := range f.Messages {
+		if m.HasOneOfFields() {
+			return true
+		}
+	}
+
+	return false
+}
+
 // NewFile returns an initialised new file
 func NewFile() *File {
 	return &File{

@@ -69,6 +69,10 @@ func (r *Registry) analyseField(fileData *data.File, msgData *data.Message, pack
 
 	msgData.Fields = append(msgData.Fields, fieldData)
 
+	if !fieldData.IsOneOfField {
+		msgData.NonOneOfFields = append(msgData.NonOneOfFields, fieldData)
+	}
+
 	// if it's an external dependencies. store in the file data so that they can be collected when every file's finished
 	if isExternal {
 		fileData.ExternalDependingTypes = append(fileData.ExternalDependingTypes, fqTypeName)

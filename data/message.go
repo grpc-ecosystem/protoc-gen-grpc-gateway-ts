@@ -12,12 +12,19 @@ type Message struct {
 	Enums []*NestedEnum
 	// Fields is a list of fields to render
 	Fields []*Field
+	// NonOneOfFields contains a subset of fields that are not in the one-of groups
+	NonOneOfFields []*Field
 	// Message is the nested messages defined inside the message
 	Messages []*Message
 	// OneOfFieldsGroups is the grouped list of one of fields with same index. so that renderer can render the clearing of other fields on set.
 	OneOfFieldsGroups map[int32][]*Field
 	// OneOfFieldNames is the names of one of fields with same index. so that renderer can render the clearing of other fields on set.
 	OneOfFieldsNames map[int32]string
+}
+
+// HasOneOfFields returns true when the message has a one of field.
+func (m *Message) HasOneOfFields() bool {
+	return len(m.OneOfFieldsGroups) > 0
 }
 
 // NewMessage initialises and return a Message

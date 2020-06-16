@@ -11,7 +11,8 @@ import (
 )
 
 const tmpl = `
-{{define "dependencies"}}{{range .}}import * as {{.ModuleIdentifier}} from "{{.SourceFile}}"
+{{define "dependencies"}}
+{{range .}}import * as {{.ModuleIdentifier}} from "{{.SourceFile}}"
 {{end}}{{end}}
 
 {{define "enums"}}
@@ -23,36 +24,52 @@ const tmpl = `
 
 {{end}}{{end}}
 
-{{define "messages"}}{{range .}}export interface {{.Name}} {
-{{range .Fields}}{{if .IsOneOfField}}
-  /**
-  * {{.Name}} is in the one of field {{index .Message.OneOfFieldsNames .OneOfIndex}}'s fields: {{range (index .Message.OneOfFieldsGroups .OneOfIndex)}}{{.Name}}, {{end}}
-  */{{end}}
+{{define "messages"}}{{range .}}
+{{- if .HasOneOfFields}}
+type Base{{.Name}} = {
+{{range .NonOneOfFields}}
   {{.Name}}?: {{tsType .}}
 {{end}}
 }
 
+export type {{.Name}} = Base{{.Name}}
+{{range $groupId, $fields := .OneOfFieldsGroups}}  & OneOf<{ {{range $fields}}{{.Name}}: {{tsType .}},{{end}} }>
+{{end}}
+{{- else -}}
+export type {{.Name}} = {
+{{range .Fields}}
+  {{.Name}}?: {{tsType .}}
+{{end}}
+}
+{{end}}
 {{end}}{{end}}
 
 {{define "services"}}{{range .}}export class {{.Name}} {
 {{range .Methods}}  
   static {{.Name}}(req: {{tsType .Input}}): Promise<gap.FetchState<{{tsType .Output}}>> {
-    return gap.gapFetchGRPC<FetchLogRequest, FetchLogResponse>("{{.URL}}", req)
+    return gap.gapFetchGRPC<{{tsType .Input}}, {{tsType .Output}}>("{{.URL}}", req)
   }
 {{end}}
-
 }
-
 {{end}}{{end}}
 
 /*
 * This file is a generated Typescript file for GRPC Gateway, DO NOT MODIFY
 */
-
-{{if gt (len .Dependencies) 0}}{{include "dependencies" .Dependencies}}{{end}}
-{{if gt (len .Enums) 0}}{{include "enums" .Enums}}{{end}}
-{{if gt (len .Messages) 0}}{{include "messages" .Messages}}{{end}}
-{{if gt (len .Services) 0}}{{include "services" .Services}}{{end}}
+{{if gt (len .Dependencies) 0}}{{- include "dependencies" .Dependencies -}}{{end}}
+{{- if .NeedsOneOfSupport}}
+type Absent<T, K extends keyof T> = { [k in Exclude<keyof T, K>]?: undefined };
+type OneOf<T> =
+  | { [k in keyof T]?: undefined }
+  | (
+    keyof T extends infer K ?
+      (K extends string & keyof T ? { [k in K]: T[K] } & Absent<T, K>
+        : never)
+    : never);
+{{end}}
+{{- if gt (len .Enums) 0}}{{include "enums" .Enums}}{{end}}
+{{- if gt (len .Messages) 0}}{{include "messages" .Messages}}{{end}}
+{{- if gt (len .Services) 0}}{{include "services" .Services}}{{end}}
 `
 
 // GetTemplate gets the templates to for the typescript file
@@ -85,26 +102,27 @@ func include(t *template.Template) func(name string, data interface{}) (string, 
 
 func tsType(r *registry.Registry, fieldType data.Type) string {
 	info := fieldType.GetType()
-	if strings.Index(info.Type, ".") != 0 {
-		scalaType := mapScalaType(info.Type)
-		if info.IsRepeated {
-			scalaType += "[]"
-		}
-		return scalaType
-	}
-	typeInfo := r.Types[info.Type]
-	if typeInfo.IsMapEntry {
+	typeInfo, ok := r.Types[info.Type]
+	if ok && typeInfo.IsMapEntry {
 		keyType := tsType(r, typeInfo.KeyType)
 		valueType := tsType(r, typeInfo.ValueType)
 
 		return fmt.Sprintf("{[key: %s]: %s}", keyType, valueType)
-
-	}
-	if !info.IsExternal {
-		return typeInfo.PackageIdentifier
 	}
 
-	return data.GetModuleName(typeInfo.Package, typeInfo.File) + "." + typeInfo.PackageIdentifier
+	typeStr := ""
+	if strings.Index(info.Type, ".") != 0 {
+		typeStr = mapScalaType(info.Type)
+	} else if !info.IsExternal {
+		typeStr = typeInfo.PackageIdentifier
+	} else {
+		typeStr = data.GetModuleName(typeInfo.Package, typeInfo.File) + "." + typeInfo.PackageIdentifier
+	}
+
+	if info.IsRepeated {
+		typeStr += "[]"
+	}
+	return typeStr
 }
 
 func mapScalaType(protoType string) string {

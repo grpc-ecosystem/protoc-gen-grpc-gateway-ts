@@ -1,0 +1,96 @@
+syntax = 'proto3';
+
+package com.squareup.cash.gap;
+
+enum Environment {
+  Staging = 0;
+  Production = 1;
+}
+
+enum DataSource {
+  DataCentre = 0;
+  Cloud = 1;
+}
+
+message LogEntry {
+  enum Level {
+    DEBUG = 0;
+    INFO = 1;
+    WARN = 2;
+    ERROR = 3;
+  }
+
+  oneof identifier {
+    string application = 1;
+    string service = 2;
+  }
+  string hostname = 3;
+  Level level = 4;
+  int32 elapsed = 5;
+  double timestamp = 6;
+  Environment env = 7;
+  bool hasStackTrace = 8;
+  string message = 9;
+  repeated string tags = 10;
+  repeated StackTrace stackTraces = 11;
+
+  message StackTrace {
+    message Exception {
+      string type = 1;
+      string message = 2;
+    }
+
+    message Method {
+      string identifier = 1;
+      string file = 2;
+      int64 line = 3;
+    }
+
+    Exception exception = 1;
+    repeated Method lines = 2;
+
+  }
+
+}
+
+message LogStream {
+  oneof source {
+    DataCentreLogEntries dataCentre = 1;
+    CloudLogEntries cloud = 2;
+  }
+}
+
+message DataCentreLogEntries {
+  repeated LogEntry logs = 1;
+}
+
+message CloudLogEntries {
+  repeated LogEntry logs = 1;
+}
+
+message FetchLogRequest {
+  DataSource source = 1;
+  oneof identifier {
+    string application = 2;
+    string service = 3;
+  }
+}
+
+message FetchLogResponse {
+  LogStream result = 1;
+}
+
+message PushLogRequest {
+  LogEntry entry = 1;
+  DataSource source = 2;
+}
+
+message PushLogResponse {
+  bool success = 1;
+}
+
+service LogService {
+  rpc FetchLog (FetchLogRequest) returns (FetchLogResponse);
+  rpc StreamLog (FetchLogRequest) returns (stream FetchLogResponse);
+  rpc PushLog (PushLogRequest) returns (PushLogResponse);
+}

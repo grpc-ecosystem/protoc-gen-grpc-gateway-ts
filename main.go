@@ -34,12 +34,6 @@ func encodeResponse(resp proto.Message) {
 
 func main() {
 	req := decodeReq()
-	f, err := os.Create("./protoc-gen-grpc-gateway-ts.log")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-
 	g := generator.New()
 
 	resp, err := g.Generate(req)
