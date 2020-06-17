@@ -29,14 +29,14 @@ func (r *Registry) analyseService(fileData *data.File, packageName string, fileN
 		}
 
 		inputTypeFQName := *method.InputType
-		isInputTypeExternal := r.isExternalDependencies(inputTypeFQName, packageName)
+		isInputTypeExternal := r.isExternalDependenciesOutsidePackage(inputTypeFQName, packageName)
 
 		if isInputTypeExternal {
 			fileData.ExternalDependingTypes = append(fileData.ExternalDependingTypes, inputTypeFQName)
 		}
 
 		outputTypeFQName := *method.OutputType
-		isOutputTypeExternal := r.isExternalDependencies(outputTypeFQName, packageName)
+		isOutputTypeExternal := r.isExternalDependenciesOutsidePackage(outputTypeFQName, packageName)
 
 		if isOutputTypeExternal {
 			fileData.ExternalDependingTypes = append(fileData.ExternalDependingTypes, outputTypeFQName)
@@ -56,6 +56,9 @@ func (r *Registry) analyseService(fileData *data.File, packageName string, fileN
 			ServerStreaming: method.GetServerStreaming(),
 			ClientStreaming: method.GetClientStreaming(),
 		}
+
+		fileData.TrackPackageNonScalarType(methodData.Input)
+		fileData.TrackPackageNonScalarType(methodData.Output)
 
 		serviceData.Methods = append(serviceData.Methods, methodData)
 	}

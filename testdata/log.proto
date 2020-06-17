@@ -1,16 +1,8 @@
 syntax = 'proto3';
 
 package com.squareup.cash.gap;
-
-enum Environment {
-  Staging = 0;
-  Production = 1;
-}
-
-enum DataSource {
-  DataCentre = 0;
-  Cloud = 1;
-}
+import "environment.proto";
+import "datasource/datasource.proto";
 
 message LogEntry {
   enum Level {
@@ -69,7 +61,7 @@ message CloudLogEntries {
 }
 
 message FetchLogRequest {
-  DataSource source = 1;
+  com.squareup.cash.gap.datasource.DataSource source = 1;
   oneof identifier {
     string application = 2;
     string service = 3;
@@ -82,7 +74,7 @@ message FetchLogResponse {
 
 message PushLogRequest {
   LogEntry entry = 1;
-  DataSource source = 2;
+  com.squareup.cash.gap.datasource.DataSource source = 2;
 }
 
 message PushLogResponse {

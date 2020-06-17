@@ -51,7 +51,7 @@ func (r *Registry) getFieldType(f *descriptorpb.FieldDescriptorProto) string {
 func (r *Registry) analyseField(fileData *data.File, msgData *data.Message, packageName string, f *descriptorpb.FieldDescriptorProto) {
 	fqTypeName := r.getFieldType(f)
 
-	isExternal := r.isExternalDependencies(fqTypeName, packageName)
+	isExternal := r.isExternalDependenciesOutsidePackage(fqTypeName, packageName)
 
 	fieldData := &data.Field{
 		Name:         f.GetName(),
@@ -88,4 +88,6 @@ func (r *Registry) analyseField(fileData *data.File, msgData *data.Message, pack
 		}
 		msgData.OneOfFieldsGroups[index] = append(msgData.OneOfFieldsGroups[index], fieldData)
 	}
+
+	fileData.TrackPackageNonScalarType(fieldData)
 }

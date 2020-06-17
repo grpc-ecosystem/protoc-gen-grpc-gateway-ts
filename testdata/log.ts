@@ -3,6 +3,8 @@
 */
 
 import * as gap from "gap/admin/lib/useGapFetch"
+import * as ComSquareupCashGapEnvironment from "./environment"
+import * as ComSquareupCashGapDatasourceDatasource from "./datasource/datasource"
 
 type Absent<T, K extends keyof T> = { [k in Exclude<keyof T, K>]?: undefined };
 type OneOf<T> =
@@ -12,22 +14,6 @@ type OneOf<T> =
       (K extends string & keyof T ? { [k in K]: T[K] } & Absent<T, K>
         : never)
     : never);
-
-export enum Environment {
-
-  Staging = "Staging",
-
-  Production = "Production",
-
-}
-
-export enum DataSource {
-
-  DataCentre = "DataCentre",
-
-  Cloud = "Cloud",
-
-}
 
 export enum LogEntryLevel {
 
@@ -78,7 +64,7 @@ type BaseLogEntry = {
 
   timestamp?: number
 
-  env?: Environment
+  env?: ComSquareupCashGapEnvironment.Environment
 
   hasStackTrace?: boolean
 
@@ -116,7 +102,7 @@ export type CloudLogEntries = {
 
 type BaseFetchLogRequest = {
 
-  source?: DataSource
+  source?: ComSquareupCashGapDatasourceDatasource.DataSource
 
 }
 
@@ -133,7 +119,7 @@ export type PushLogRequest = {
 
   entry?: LogEntry
 
-  source?: DataSource
+  source?: ComSquareupCashGapDatasourceDatasource.DataSource
 
 }
 

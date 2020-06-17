@@ -3,6 +3,8 @@ package registry
 import (
 	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
 	"git.sqcorp.co/cash/gap/errors"
+	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+	log "github.com/sirupsen/logrus" // nolint: depguard
 	"google.golang.org/protobuf/types/descriptorpb"
 	"path/filepath"
 	"strings"
@@ -13,6 +15,9 @@ import (
 type Registry struct {
 	// Types stores the type information keyed by the fully qualified name of a type
 	Types map[string]*TypeInformation
+
+	// FilesToGenerate contains a list of actual file to generate, different from all the files from the request, some of which are import files
+	FilesToGenerate map[string]bool
 }
 
 // NewRegistry initialise the registry and return the instance
@@ -39,30 +44,26 @@ type TypeInformation struct {
 	// IsMapEntry indicates whether this type is a Map Entry
 	IsMapEntry bool
 	// KeyType is the type information for the map key
-	KeyType *MapEntryType
+	KeyType *data.MapEntryType
 	// Value type is the type information for the map value
-	ValueType *MapEntryType
+	ValueType *data.MapEntryType
 }
 
-// MapEntryType is the generic entry type for both key and value
-type MapEntryType struct {
-	// Type of the map entry
-	Type string
-	// IsExternal indicates the field typeis external to its own package
-	IsExternal bool
-}
-
-// GetType returns the type information for the type entry
-func (m *MapEntryType) GetType() *data.TypeInfo {
-	return &data.TypeInfo{
-		Type:       m.Type,
-		IsRepeated: false,
-		IsExternal: m.IsExternal,
-	}
+// IsFileToGenerate contains the file to be generated in the request
+func (r *Registry) IsFileToGenerate(name string) bool {
+	result, ok := r.FilesToGenerate[name]
+	return ok && result
 }
 
 // Analyse analyses the the file inputs, stores types information and spits out the rendering data
-func (r *Registry) Analyse(files []*descriptorpb.FileDescriptorProto) (map[string]*data.File, error) {
+func (r *Registry) Analyse(req *plugin.CodeGeneratorRequest) (map[string]*data.File, error) {
+	r.FilesToGenerate = make(map[string]bool)
+	for _, f := range req.GetFileToGenerate() {
+		r.FilesToGenerate[f] = true
+	}
+
+	files := req.GetProtoFile()
+	log.Debugf("about to start anaylyse files, %d in total", len(files))
 	data := make(map[string]*data.File)
 	// analyse all files in the request first
 	for _, f := range files {
@@ -93,7 +94,7 @@ func (r *Registry) getParentPrefixes(parents []string) string {
 	return parentsPrefix
 }
 
-func (r *Registry) isExternalDependencies(fqTypeName, packageName string) bool {
+func (r *Registry) isExternalDependenciesOutsidePackage(fqTypeName, packageName string) bool {
 	return strings.Index(fqTypeName, "."+packageName) != 0 && strings.Index(fqTypeName, ".") == 0
 }
 
@@ -116,13 +117,31 @@ func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*dat
 				// Referencing types will be [ModuleIdentifier].[PackageIdentifier]
 				base := fileData.TSFileName
 				target := data.GetTSFileName(typeInfo.File)
-				relPath, err := filepath.Rel(base, target)
-				if err != nil {
-					return errors.Wrapf(err, "error getting relative path between for %s, %s", base, target)
+				sourceFile := ""
+				var err error
+				if !r.IsFileToGenerate(typeInfo.File) {
+					sourceFile = "gap/protos/" + target
+
+				} else {
+					sourceFile, err = filepath.Rel(filepath.Dir(base), target)
+					if err != nil {
+						return errors.Wrapf(err, "error getting relative path between for %s, %s", base, target)
+					}
+					slashSourceFile := filepath.ToSlash(sourceFile)
+					if strings.Index(slashSourceFile, "../") != 0 {
+						slashSourceFile = "./" + slashSourceFile
+					}
+
+					sourceFile = filepath.FromSlash(slashSourceFile)
 				}
+
+				// remove ts suffix
+				suffixIndex := strings.LastIndex(sourceFile, ".ts")
+				sourceFile = sourceFile[0:suffixIndex]
+
 				dependencies[identifier] = &data.Dependency{
 					ModuleIdentifier: data.GetModuleName(typeInfo.Package, typeInfo.File),
-					SourceFile:       relPath,
+					SourceFile:       sourceFile,
 				}
 			}
 		}

@@ -10,7 +10,9 @@ import (
 
 func TestValidOneOfUseCase(t *testing.T) {
 	f, err := createFileWithContent("valid.ts", `
-import {DataSource, Environment, LogEntryLevel, LogService} from "./log";
+import {LogEntryLevel, LogService} from "./log";
+import {DataSource} from "./datasource/datasource"
+import {Environment} from "./environment"
 
 (async () => {
   const cloudSourceResult = await LogService.FetchLog({
@@ -70,7 +72,8 @@ func getTSCCommand() *exec.Cmd {
 
 func TestInvalidOneOfUseCase(t *testing.T) {
 	f, err := createFileWithContent("invalid.ts", `
-import {DataSource, Environment, LogEntryLevel, LogService} from "./log";
+import {LogService} from "./log";
+import {DataSource} from "./datasource/datasource"
 
 (async () => {
   const cloudSourceResult = await LogService.FetchLog({

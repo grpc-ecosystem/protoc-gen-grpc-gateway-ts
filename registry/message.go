@@ -31,17 +31,20 @@ func (r *Registry) analyseMessage(fileData *data.File, packageName, fileName str
 			for _, f := range message.Field {
 				switch f.GetName() {
 				case "key":
-					typeInfo.KeyType = &MapEntryType{
+					typeInfo.KeyType = &data.MapEntryType{
 						Type:       r.getFieldType(f),
-						IsExternal: r.isExternalDependencies(f.GetTypeName(), packageName),
+						IsExternal: r.isExternalDependenciesOutsidePackage(f.GetTypeName(), packageName),
 					}
 				case "value":
-					typeInfo.ValueType = &MapEntryType{
+					typeInfo.ValueType = &data.MapEntryType{
 						Type:       r.getFieldType(f),
-						IsExternal: r.isExternalDependencies(f.GetTypeName(), packageName),
+						IsExternal: r.isExternalDependenciesOutsidePackage(f.GetTypeName(), packageName),
 					}
 				}
+
 			}
+			fileData.TrackPackageNonScalarType(typeInfo.KeyType)
+			fileData.TrackPackageNonScalarType(typeInfo.ValueType)
 			// no need to add a map type into
 			return
 

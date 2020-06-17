@@ -2,10 +2,12 @@ package registry
 
 import (
 	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
+	log "github.com/sirupsen/logrus" // nolint: depguard
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 func (r *Registry) analyseFile(f *descriptorpb.FileDescriptorProto) *data.File {
+	log.Debugf("analysing %s", f.GetName())
 	fileData := data.NewFile()
 	fileName := f.GetName()
 	packageName := f.GetPackage()
@@ -36,5 +38,31 @@ func (r *Registry) analyseFile(f *descriptorpb.FileDescriptorProto) *data.File {
 		r.analyseService(fileData, packageName, fileName, service)
 	}
 
+	r.analyseFilePackageTypeDependencies(fileData)
+
 	return fileData
+}
+
+func (r *Registry) analyseFilePackageTypeDependencies(fileData *data.File) {
+	for _, t := range fileData.PackageNonScalarType {
+		// for each non scalar types try to determine if the type comes from same
+		// package but a different file. if yes then will need to add the type to
+		// the external dependencies for collection later
+		// also need to change the type's IsExternal information for rendering purpose
+		typeInfo := t.GetType()
+		fqTypeName := typeInfo.Type
+		log.Debugf("checking whether non scala type %s in the same message is external to the current file", fqTypeName)
+
+		registryType, foundInRegistry := r.Types[fqTypeName]
+		if !foundInRegistry || registryType.File != fileData.Name {
+			// this means the type from same package in file has yet to be analysed (means in different file)
+			// or the type has appeared in another file different to the current file
+			// in this case we will put the type as external in the fileData
+			// and also mutate the IsExternal field of the given type:w
+			log.Debugf("type %s is external to file %s, mutating the external dependencies information", fqTypeName, fileData.Name)
+
+			fileData.ExternalDependingTypes = append(fileData.ExternalDependingTypes, fqTypeName)
+			t.SetExternal(true)
+		}
+	}
 }

@@ -6,6 +6,7 @@ import (
 	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/registry"
 	"git.sqcorp.co/cash/gap/errors"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+	log "github.com/sirupsen/logrus" // nolint: depguard
 	"strings"
 	"text/template"
 )
@@ -26,14 +27,21 @@ func New() *TypeScriptGRPCGatewayGenerator {
 func (t *TypeScriptGRPCGatewayGenerator) Generate(req *plugin.CodeGeneratorRequest) (*plugin.CodeGeneratorResponse, error) {
 	resp := &plugin.CodeGeneratorResponse{}
 
-	filesData, err := t.Registry.Analyse(req.ProtoFile)
+	filesData, err := t.Registry.Analyse(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "error analysing proto files")
 	}
 	tmpl := GetTemplate(t.Registry)
+	log.Debugf("files to generate %v", req.GetFileToGenerate())
 
 	// feed fileData into rendering process
 	for _, fileData := range filesData {
+		if !t.Registry.IsFileToGenerate(fileData.Name) {
+			log.Debugf("file %s is not the file to generate, skipping", fileData.Name)
+			continue
+		}
+
+		log.Debugf("generating file for %s", fileData.TSFileName)
 		generated, err := t.generateFile(fileData, tmpl)
 		if err != nil {
 			return nil, errors.Wrap(err, "error generating file")

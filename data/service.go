@@ -49,3 +49,8 @@ func (m *MethodArgument) GetType() *TypeInfo {
 		IsExternal: m.IsExternal,
 	}
 }
+
+// SetExternal mutates the IsExternal attribute of the type
+func (m *MethodArgument) SetExternal(external bool) {
+	m.IsExternal = external
+}

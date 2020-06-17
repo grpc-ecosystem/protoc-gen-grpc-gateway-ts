@@ -84,3 +84,30 @@ func (f *Field) GetType() *TypeInfo {
 		IsExternal: f.IsExternal,
 	}
 }
+
+// SetExternal mutate the IsExternal attribute
+func (f *Field) SetExternal(external bool) {
+	f.IsExternal = external
+}
+
+// MapEntryType is the generic entry type for both key and value
+type MapEntryType struct {
+	// Type of the map entry
+	Type string
+	// IsExternal indicates the field typeis external to its own package
+	IsExternal bool
+}
+
+// GetType returns the type information for the type entry
+func (m *MapEntryType) GetType() *TypeInfo {
+	return &TypeInfo{
+		Type:       m.Type,
+		IsRepeated: false,
+		IsExternal: m.IsExternal,
+	}
+}
+
+// SetExternal mutate the IsExternal attribute inside
+func (m *MapEntryType) SetExternal(external bool) {
+	m.IsExternal = external
+}

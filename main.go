@@ -2,10 +2,13 @@ package main
 
 import (
 	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/generator"
+	"git.sqcorp.co/cash/gap/errors"
 	"github.com/golang/protobuf/proto"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+	log "github.com/sirupsen/logrus" // nolint: depguard
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 func decodeReq() *plugin.CodeGeneratorRequest {
@@ -35,11 +38,57 @@ func encodeResponse(resp proto.Message) {
 func main() {
 	req := decodeReq()
 	g := generator.New()
+	paramsMap := getParamsMap(req)
 
+	err := configureLogging(paramsMap)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info("Starts generating file request")
 	resp, err := g.Generate(req)
 	if err != nil {
 		panic(err)
 	}
 
 	encodeResponse(resp)
+	log.Info("generation finished")
+}
+
+func configureLogging(paramsMap map[string]string) error {
+	if paramsMap["logtostderr"] == "true" { // configure logging when it's in the options
+		log.SetFormatter(&log.TextFormatter{
+			DisableTimestamp: true,
+		})
+		log.SetOutput(os.Stderr)
+		log.Debugf("Logging configured completed, logging has been enabled")
+		levelStr := paramsMap["loglevel"]
+		if levelStr != "" {
+			level, err := log.ParseLevel(levelStr)
+			if err != nil {
+				return errors.Wrapf(err, "error parsing log level %s", levelStr)
+			}
+
+			log.SetLevel(level)
+		} else {
+			log.SetLevel(log.InfoLevel)
+		}
+	}
+
+	return nil
+}
+
+func getParamsMap(req *plugin.CodeGeneratorRequest) map[string]string {
+	paramsMap := make(map[string]string)
+	params := req.GetParameter()
+
+	for _, p := range strings.Split(params, ",") {
+		if i := strings.Index(p, "="); i < 0 {
+			paramsMap[p] = ""
+		} else {
+			paramsMap[p[0:i]] = p[i+1:]
+		}
+	}
+
+	return paramsMap
 }

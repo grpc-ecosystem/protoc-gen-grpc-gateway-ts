@@ -1,6 +1,7 @@
 package data
 
 import (
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -22,6 +23,8 @@ type File struct {
 	Name string
 	// TSFileName is the name of the output file
 	TSFileName string
+	// PackageNonScalarType stores the type inside the same packages within the file, which will be used to figure out external dependencies inside the same package (different files)
+	PackageNonScalarType []Type
 }
 
 // NeedsOneOfSupport indicates the file needs one of support type utilities
@@ -33,6 +36,14 @@ func (f *File) NeedsOneOfSupport() bool {
 	}
 
 	return false
+}
+
+// TrackPackageNonScalarType tracks the supplied non scala type in the same package
+func (f *File) TrackPackageNonScalarType(t Type) {
+	isNonScalarType := strings.Index(t.GetType().Type, ".") == 0
+	if isNonScalarType {
+		f.PackageNonScalarType = append(f.PackageNonScalarType, t)
+	}
 }
 
 // NewFile returns an initialised new file
@@ -61,22 +72,29 @@ type Dependency struct {
 func GetModuleName(packageName, fileName string) string {
 	baseName := filepath.Base(fileName)
 	ext := filepath.Ext(fileName)
-	name := fileName[0 : len(baseName)-len(ext)]
-	return strings.ReplaceAll(packageName, ".", "") + name
+	name := baseName[0 : len(baseName)-len(ext)]
+	packageParts := strings.Split(packageName, ".")
+
+	for i, p := range packageParts {
+		packageParts[i] = strings.ToUpper(p[:1]) + p[1:]
+	}
+	return strings.Join(packageParts, "") + strings.ToUpper(name[:1]) + name[1:]
 }
 
 // GetTSFileName gets the typescript filename out of the proto file name
 func GetTSFileName(fileName string) string {
 	baseName := filepath.Base(fileName)
 	ext := filepath.Ext(fileName)
-	name := fileName[0 : len(baseName)-len(ext)]
-	return name + ".ts"
+	name := baseName[0 : len(baseName)-len(ext)]
+	return path.Join(filepath.Dir(fileName), name+".ts")
 }
 
 // Type is an interface to get type out of field and method arguments
 type Type interface {
 	// GetType returns some information of the type to aid the rendering
 	GetType() *TypeInfo
+	// SetExternal changes the external field inside the data structure
+	SetExternal(bool)
 }
 
 // TypeInfo stores some common type information for rendering
