@@ -3,11 +3,13 @@ package generator
 import (
 	"bytes"
 	"fmt"
-	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
-	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/registry"
-	"github.com/Masterminds/sprig"
 	"strings"
 	"text/template"
+
+	"github.com/Masterminds/sprig"
+
+	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
+	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/registry"
 )
 
 const tmpl = `
@@ -17,9 +19,9 @@ const tmpl = `
 
 {{define "enums"}}
 {{range .}}export enum {{.Name}} {
-{{range .Values}}
+{{- range .Values}}
   {{.}} = "{{.}}",
-{{end}}
+{{- end}}
 }
 
 {{end}}{{end}}
@@ -27,9 +29,9 @@ const tmpl = `
 {{define "messages"}}{{range .}}
 {{- if .HasOneOfFields}}
 type Base{{.Name}} = {
-{{range .NonOneOfFields}}
+{{- range .NonOneOfFields}}
   {{.Name}}?: {{tsType .}}
-{{end}}
+{{- end}}
 }
 
 export type {{.Name}} = Base{{.Name}}
@@ -37,26 +39,26 @@ export type {{.Name}} = Base{{.Name}}
 {{end}}
 {{- else -}}
 export type {{.Name}} = {
-{{range .Fields}}
+{{- range .Fields}}
   {{.Name}}?: {{tsType .}}
-{{end}}
+{{- end}}
 }
 {{end}}
 {{end}}{{end}}
 
 {{define "services"}}{{range .}}export class {{.Name}} {
-{{range .Methods}}  
+{{- range .Methods}}  
   static {{.Name}}(req: {{tsType .Input}}): Promise<gap.FetchState<{{tsType .Output}}>> {
     return gap.gapFetchGRPC<{{tsType .Input}}, {{tsType .Output}}>("{{.URL}}", req)
   }
-{{end}}
+{{- end}}
 }
 {{end}}{{end}}
 
 /*
 * This file is a generated Typescript file for GRPC Gateway, DO NOT MODIFY
 */
-{{if gt (len .Dependencies) 0}}{{- include "dependencies" .Dependencies -}}{{end}}
+{{if .Dependencies}}{{- include "dependencies" .StableDependencies -}}{{end}}
 {{- if .NeedsOneOfSupport}}
 type Absent<T, K extends keyof T> = { [k in Exclude<keyof T, K>]?: undefined };
 type OneOf<T> =
@@ -67,9 +69,9 @@ type OneOf<T> =
         : never)
     : never);
 {{end}}
-{{- if gt (len .Enums) 0}}{{include "enums" .Enums}}{{end}}
-{{- if gt (len .Messages) 0}}{{include "messages" .Messages}}{{end}}
-{{- if gt (len .Services) 0}}{{include "services" .Services}}{{end}}
+{{- if .Enums}}{{include "enums" .Enums}}{{end}}
+{{- if .Messages}}{{include "messages" .Messages}}{{end}}
+{{- if .Services}}{{include "services" .Services}}{{end}}
 `
 
 // GetTemplate gets the templates to for the typescript file

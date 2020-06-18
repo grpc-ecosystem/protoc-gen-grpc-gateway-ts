@@ -3,6 +3,7 @@ package data
 import (
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -25,6 +26,16 @@ type File struct {
 	TSFileName string
 	// PackageNonScalarType stores the type inside the same packages within the file, which will be used to figure out external dependencies inside the same package (different files)
 	PackageNonScalarType []Type
+}
+
+// StableDependencies are dependencies in a stable order.
+func (f *File) StableDependencies() []*Dependency {
+	out := make([]*Dependency, len(f.Dependencies))
+	copy(out, f.Dependencies)
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].SourceFile < out[j].SourceFile
+	})
+	return out
 }
 
 // NeedsOneOfSupport indicates the file needs one of support type utilities

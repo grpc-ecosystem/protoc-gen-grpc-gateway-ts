@@ -1,14 +1,16 @@
 package main
 
 import (
-	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/generator"
-	"git.sqcorp.co/cash/gap/errors"
-	"github.com/golang/protobuf/proto"
-	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
-	log "github.com/sirupsen/logrus" // nolint: depguard
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
+	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+	log "github.com/sirupsen/logrus" // nolint: depguard
+
+	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/generator"
+	"git.sqcorp.co/cash/gap/errors"
 )
 
 func decodeReq() *plugin.CodeGeneratorRequest {
@@ -45,14 +47,14 @@ func main() {
 		panic(err)
 	}
 
-	log.Info("Starts generating file request")
+	log.Debug("Starts generating file request")
 	resp, err := g.Generate(req)
 	if err != nil {
 		panic(err)
 	}
 
 	encodeResponse(resp)
-	log.Info("generation finished")
+	log.Debug("generation finished")
 }
 
 func configureLogging(paramsMap map[string]string) error {
