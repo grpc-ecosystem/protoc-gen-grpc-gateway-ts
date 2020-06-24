@@ -3,9 +3,6 @@
 */
 
 export enum Environment {
-
   Staging = "Staging",
-
   Production = "Production",
-
 }

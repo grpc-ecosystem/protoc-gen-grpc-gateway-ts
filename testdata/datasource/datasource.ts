@@ -3,9 +3,6 @@
 */
 
 export enum DataSource {
-
   DataCentre = "DataCentre",
-
   Cloud = "Cloud",
-
 }

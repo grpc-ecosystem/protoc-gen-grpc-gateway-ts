@@ -48,9 +48,15 @@ export type {{.Name}} = {
 
 {{define "services"}}{{range .}}export class {{.Name}} {
 {{- range .Methods}}  
+{{- if .ServerStreaming }}
+  static {{.Name}}(req: {{tsType .Input}}, entityNotifier?: gap.NotifyStreamEntityArrival<{{tsType .Output}}>): Promise<gap.FetchState<undefined>> {
+    return gap.gapFetchGRPCStream<{{tsType .Input}}, {{tsType .Output}}>("{{.URL}}", req, entityNotifier)
+  }
+{{- else }}
   static {{.Name}}(req: {{tsType .Input}}): Promise<gap.FetchState<{{tsType .Output}}>> {
     return gap.gapFetchGRPC<{{tsType .Input}}, {{tsType .Output}}>("{{.URL}}", req)
   }
+{{- end}}
 {{- end}}
 }
 {{end}}{{end}}
