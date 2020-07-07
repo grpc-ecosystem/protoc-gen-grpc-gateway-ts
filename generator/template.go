@@ -35,7 +35,7 @@ type Base{{.Name}} = {
 }
 
 export type {{.Name}} = Base{{.Name}}
-{{range $groupId, $fields := .OneOfFieldsGroups}}  & OneOf<{ {{range $fields}}{{.Name}}: {{tsType .}},{{end}} }>
+{{range $groupId, $fields := .OneOfFieldsGroups}}  & OneOf<{ {{range $index, $field := $fields}}{{$field.Name}}: {{tsType $field}}{{if (lt (add $index 1) (len $fields))}}; {{end}}{{end}} }>
 {{end}}
 {{- else -}}
 export type {{.Name}} = {

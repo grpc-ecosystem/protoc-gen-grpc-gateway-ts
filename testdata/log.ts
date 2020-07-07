@@ -52,14 +52,14 @@ type BaseLogEntry = {
 }
 
 export type LogEntry = BaseLogEntry
-  & OneOf<{ application: string,service: string, }>
+  & OneOf<{ application: string; service: string }>
 
 
 type BaseLogStream = {
 }
 
 export type LogStream = BaseLogStream
-  & OneOf<{ dataCentre: DataCentreLogEntries,cloud: CloudLogEntries, }>
+  & OneOf<{ dataCentre: DataCentreLogEntries; cloud: CloudLogEntries }>
 
 export type DataCentreLogEntries = {
   logs?: LogEntry[]
@@ -75,7 +75,7 @@ type BaseFetchLogRequest = {
 }
 
 export type FetchLogRequest = BaseFetchLogRequest
-  & OneOf<{ application: string,service: string, }>
+  & OneOf<{ application: string; service: string }>
 
 export type FetchLogResponse = {
   result?: LogStream
