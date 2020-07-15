@@ -1,8 +1,9 @@
 package registry
 
 import (
+	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
+
 	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
-	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 // getFieldType generates an intermediate type and leave the rendering logic to choose what to render

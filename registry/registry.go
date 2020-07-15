@@ -1,14 +1,16 @@
 package registry
 
 import (
-	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
-	"git.sqcorp.co/cash/gap/errors"
-	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
-	log "github.com/sirupsen/logrus" // nolint: depguard
-	"google.golang.org/protobuf/types/descriptorpb"
 	"path"
 	"path/filepath"
 	"strings"
+
+	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
+	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+	log "github.com/sirupsen/logrus" // nolint: depguard
+
+	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
+	"git.sqcorp.co/cash/gap/errors"
 )
 
 const (
