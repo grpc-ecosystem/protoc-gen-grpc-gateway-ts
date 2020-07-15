@@ -19,10 +19,15 @@ type TypeScriptGRPCGatewayGenerator struct {
 }
 
 // New returns an initialised generator
-func New() *TypeScriptGRPCGatewayGenerator {
-	return &TypeScriptGRPCGatewayGenerator{
-		Registry: registry.NewRegistry(),
+func New(paramsMap map[string]string) (*TypeScriptGRPCGatewayGenerator, error) {
+	registry, err := registry.NewRegistry(paramsMap)
+	if err != nil {
+		return nil, errors.Wrap(err, "error instantiating a new registry")
 	}
+
+	return &TypeScriptGRPCGatewayGenerator{
+		Registry: registry,
+	}, nil
 }
 
 // Generate take a code generator request and returns a response. it analyse request with registry and use the generated data to render ts files

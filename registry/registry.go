@@ -6,8 +6,16 @@ import (
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	log "github.com/sirupsen/logrus" // nolint: depguard
 	"google.golang.org/protobuf/types/descriptorpb"
+	"path"
 	"path/filepath"
 	"strings"
+)
+
+const (
+	// TSImportRootParamsKey contains the key for common_import_root in parameters
+	TSImportRootParamsKey = "ts_import_root"
+	// TSImportRootAliasParamsKey contains the key for common_import_root_alias in parameters
+	TSImportRootAliasParamsKey = "ts_import_root_alias"
 )
 
 // Registry analyse generation request, spits out the data the the rendering process
@@ -18,13 +26,51 @@ type Registry struct {
 
 	// FilesToGenerate contains a list of actual file to generate, different from all the files from the request, some of which are import files
 	FilesToGenerate map[string]bool
+
+	// TSImportRoot represents the ts import root for the generator to figure out required import path, will default to cwd
+	TSImportRoot string
+
+	// TSImportRootAlias if not empty will substitutes the common import root when writing the import into the js file
+	TSImportRootAlias string
 }
 
 // NewRegistry initialise the registry and return the instance
-func NewRegistry() *Registry {
-	return &Registry{
-		Types: make(map[string]*TypeInformation),
+func NewRegistry(paramsMap map[string]string) (*Registry, error) {
+	tsImportRoot, tsImportRootAlias, err := getTSImportRootInformation(paramsMap)
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting common import root information")
 	}
+	return &Registry{
+		Types:             make(map[string]*TypeInformation),
+		TSImportRoot:      tsImportRoot,
+		TSImportRootAlias: tsImportRootAlias,
+	}, nil
+}
+
+func getTSImportRootInformation(paramsMap map[string]string) (string, string, error) {
+	tsImportRoot, ok := paramsMap[TSImportRootParamsKey]
+
+	if !ok {
+		tsImportRoot = "."
+	}
+
+	if !path.IsAbs(tsImportRoot) {
+		absPath, err := filepath.Abs(tsImportRoot)
+		if err != nil {
+			return "", "", errors.Wrapf(err, "error turning path %s into absolute path", tsImportRoot)
+		}
+
+		tsImportRoot = absPath
+	}
+
+	tsImportRootAlias, ok := paramsMap[TSImportRootAliasParamsKey]
+
+	if !ok {
+		tsImportRootAlias = ""
+	}
+
+	return tsImportRoot, tsImportRootAlias, nil
+
 }
 
 // TypeInformation store the information about a given type
@@ -100,6 +146,7 @@ func (r *Registry) isExternalDependenciesOutsidePackage(fqTypeName, packageName 
 
 func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*data.File) error {
 	for _, fileData := range filesData {
+		log.Debugf("collecting dependencies information for %s", fileData.TSFileName)
 		// dependency group up the dependency by package+file
 		dependencies := make(map[string]*data.Dependency)
 		for _, typeName := range fileData.ExternalDependingTypes {
@@ -120,7 +167,34 @@ func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*dat
 				sourceFile := ""
 				var err error
 				if !r.IsFileToGenerate(typeInfo.File) {
-					sourceFile = "gap/protos/" + target
+					// try to find the actual file path using glob
+					matches, err := filepath.Glob(path.Join(r.TSImportRoot, "**", typeInfo.File))
+					if err != nil {
+						return errors.Wrapf(err, "error looking up real path for proto file %s", typeInfo.File)
+					}
+					if len(matches) > 1 {
+						log.Warnf("more than one proto file found for %s, taking the first one", typeInfo.File)
+					}
+
+					absoluteTsFileName := data.GetTSFileName(matches[0])
+					log.Debugf("absolute path for match found is: %s", absoluteTsFileName)
+					if r.TSImportRootAlias != "" { // if an alias has been provided
+						sourceFile = strings.ReplaceAll(absoluteTsFileName, r.TSImportRoot, r.TSImportRootAlias)
+						log.Debugf("replacing root alias %s for %s, result: %s", r.TSImportRootAlias, absoluteTsFileName, sourceFile)
+					} else {
+						log.Debugf("no root alias found, trying to get the relative path for %s", absoluteTsFileName)
+						absBase, err := filepath.Abs(base)
+						if err != nil {
+							return errors.Wrapf(err, "error looking up absolute directory with base dir: %s", base)
+						}
+
+						sourceFile, err = filepath.Rel(filepath.Dir(absBase), absoluteTsFileName)
+						if err != nil {
+							return errors.Wrapf(err, "error looking up relative path for source file %s", absoluteTsFileName)
+						}
+
+						log.Debugf("no root alias found, trying to get the relative path for %s, result: %s", absoluteTsFileName, sourceFile)
+					}
 
 				} else {
 					sourceFile, err = filepath.Rel(filepath.Dir(base), target)
