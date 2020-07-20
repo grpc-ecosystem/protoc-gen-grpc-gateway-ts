@@ -1,16 +1,16 @@
 package registry
 
 import (
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
+	"git.sqcorp.co/cash/gap/errors"
 	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	log "github.com/sirupsen/logrus" // nolint: depguard
-
-	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
-	"git.sqcorp.co/cash/gap/errors"
 )
 
 const (
@@ -42,6 +42,7 @@ func NewRegistry(paramsMap map[string]string) (*Registry, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting common import root information")
 	}
+
 	return &Registry{
 		Types:             make(map[string]*TypeInformation),
 		TSImportRoot:      tsImportRoot,
@@ -170,15 +171,26 @@ func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*dat
 				var err error
 				if !r.IsFileToGenerate(typeInfo.File) {
 					// try to find the actual file path using glob
-					matches, err := filepath.Glob(path.Join(r.TSImportRoot, "**", typeInfo.File))
+					files := make([]string, 0)
+					err := filepath.Walk(r.TSImportRoot, func(path string, info os.FileInfo, err error) error {
+						if strings.HasSuffix(path, typeInfo.File) {
+							files = append(files, path)
+						}
+						return err
+					})
+
 					if err != nil {
-						return errors.Wrapf(err, "error looking up real path for proto file %s", typeInfo.File)
-					}
-					if len(matches) > 1 {
-						log.Warnf("more than one proto file found for %s, taking the first one", typeInfo.File)
+						return errors.Wrapf(err, "error walking the ts import root file tree")
 					}
 
-					absoluteTsFileName := data.GetTSFileName(matches[0])
+					if len(files) > 1 {
+						log.Warnf("more than one proto file found for %s, taking the first one", typeInfo.File)
+					} else if len(files) < 1 {
+						log.Errorf("no file found for %s under %s, %s", typeInfo.File, r.TSImportRoot, path.Join(r.TSImportRoot, "**/*", typeInfo.File))
+						return errors.Wrapf(err, "cannot find file for %s under ts import root: %s", typeInfo.File, r.TSImportRoot)
+					}
+
+					absoluteTsFileName := data.GetTSFileName(files[0])
 					log.Debugf("absolute path for match found is: %s", absoluteTsFileName)
 					if r.TSImportRootAlias != "" { // if an alias has been provided
 						sourceFile = strings.ReplaceAll(absoluteTsFileName, r.TSImportRoot, r.TSImportRootAlias)
