@@ -40,12 +40,12 @@ func encodeResponse(resp proto.Message) {
 func main() {
 	req := decodeReq()
 	paramsMap := getParamsMap(req)
-	g, err := generator.New(paramsMap)
+	err := configureLogging(paramsMap)
 	if err != nil {
 		panic(err)
 	}
 
-	err = configureLogging(paramsMap)
+	g, err := generator.New(paramsMap)
 	if err != nil {
 		panic(err)
 	}

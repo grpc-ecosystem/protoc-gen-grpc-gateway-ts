@@ -15,9 +15,11 @@ import (
 
 const (
 	// TSImportRootParamsKey contains the key for common_import_root in parameters
-	TSImportRootParamsKey = "ts_import_root"
+	TSImportRootParamsKey = "ts_import_roots"
 	// TSImportRootAliasParamsKey contains the key for common_import_root_alias in parameters
-	TSImportRootAliasParamsKey = "ts_import_root_alias"
+	TSImportRootAliasParamsKey = "ts_import_root_aliases"
+	// TSImportRootSeparator separates the ts import root inside ts_import_roots & ts_import_root_aliases
+	TSImportRootSeparator = ";"
 )
 
 // Registry analyse generation request, spits out the data the the rendering process
@@ -29,51 +31,75 @@ type Registry struct {
 	// FilesToGenerate contains a list of actual file to generate, different from all the files from the request, some of which are import files
 	FilesToGenerate map[string]bool
 
-	// TSImportRoot represents the ts import root for the generator to figure out required import path, will default to cwd
-	TSImportRoot string
+	// TSImportRoots represents the ts import root for the generator to figure out required import path, will default to cwd
+	TSImportRoots []string
 
-	// TSImportRootAlias if not empty will substitutes the common import root when writing the import into the js file
-	TSImportRootAlias string
+	// TSImportRootAliases if not empty will substitutes the common import root when writing the import into the js file
+	TSImportRootAliases []string
 }
 
 // NewRegistry initialise the registry and return the instance
 func NewRegistry(paramsMap map[string]string) (*Registry, error) {
-	tsImportRoot, tsImportRootAlias, err := getTSImportRootInformation(paramsMap)
+	tsImportRoots, tsImportRootAliases, err := getTSImportRootInformation(paramsMap)
+	log.Debugf("found ts import roots %v", tsImportRoots)
+	log.Debugf("found ts import root aliases %v", tsImportRootAliases)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting common import root information")
 	}
 
 	return &Registry{
-		Types:             make(map[string]*TypeInformation),
-		TSImportRoot:      tsImportRoot,
-		TSImportRootAlias: tsImportRootAlias,
+		Types:               make(map[string]*TypeInformation),
+		TSImportRoots:       tsImportRoots,
+		TSImportRootAliases: tsImportRootAliases,
 	}, nil
 }
 
-func getTSImportRootInformation(paramsMap map[string]string) (string, string, error) {
-	tsImportRoot, ok := paramsMap[TSImportRootParamsKey]
+func getTSImportRootInformation(paramsMap map[string]string) ([]string, []string, error) {
+	tsImportRootsValue, ok := paramsMap[TSImportRootParamsKey]
 
 	if !ok {
-		tsImportRoot = "."
+		tsImportRootsValue = "."
 	}
 
-	if !path.IsAbs(tsImportRoot) {
-		absPath, err := filepath.Abs(tsImportRoot)
-		if err != nil {
-			return "", "", errors.Wrapf(err, "error turning path %s into absolute path", tsImportRoot)
+	splittedImportRoots := strings.Split(tsImportRootsValue, TSImportRootSeparator)
+	numImportRoots := len(splittedImportRoots)
+
+	tsImportRoots := make([]string, 0, numImportRoots)
+
+	for _, r := range splittedImportRoots {
+		tsImportRoot := r
+		if !path.IsAbs(tsImportRoot) {
+			absPath, err := filepath.Abs(tsImportRoot)
+			if err != nil {
+				return nil, nil, errors.Wrapf(err, "error turning path %s into absolute path", tsImportRoot)
+			}
+
+			tsImportRoot = absPath
 		}
 
-		tsImportRoot = absPath
+		tsImportRoots = append(tsImportRoots, tsImportRoot)
 	}
 
-	tsImportRootAlias, ok := paramsMap[TSImportRootAliasParamsKey]
+	tsImportRootAliasValue, ok := paramsMap[TSImportRootAliasParamsKey]
 
 	if !ok {
-		tsImportRootAlias = ""
+		tsImportRootAliasValue = ""
 	}
 
-	return tsImportRoot, tsImportRootAlias, nil
+	splittedImportRootAliases := strings.Split(tsImportRootAliasValue, TSImportRootSeparator)
 
+	tsImportRootAliases := make([]string, numImportRoots)
+
+	for i, ra := range splittedImportRootAliases {
+		if i >= numImportRoots {
+			// in case we have more root alias than root, we will just take the number matches the roots
+			break
+		}
+		tsImportRootAliases[i] = ra
+
+	}
+
+	return tsImportRoots, tsImportRootAliases, nil
 }
 
 // TypeInformation store the information about a given type
@@ -170,31 +196,30 @@ func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*dat
 				sourceFile := ""
 				var err error
 				if !r.IsFileToGenerate(typeInfo.File) {
-					// try to find the actual file path using glob
-					files := make([]string, 0)
-					err := filepath.Walk(r.TSImportRoot, func(path string, info os.FileInfo, err error) error {
-						if strings.HasSuffix(path, typeInfo.File) {
-							files = append(files, path)
+					// iterate through the import paths
+					found := ""
+					foundAtRoot := ""
+					alias := ""
+					for i, root := range r.TSImportRoots {
+						found = filepath.Join(root, typeInfo.File)
+						if _, err := os.Stat(found); err == nil {
+							// file exists we have found the file already
+							foundAtRoot = root
+							alias = r.TSImportRootAliases[i]
+							break
 						}
-						return err
-					})
-
-					if err != nil {
-						return errors.Wrapf(err, "error walking the ts import root file tree")
 					}
 
-					if len(files) > 1 {
-						log.Warnf("more than one proto file found for %s, taking the first one", typeInfo.File)
-					} else if len(files) < 1 {
-						log.Errorf("no file found for %s under %s, %s", typeInfo.File, r.TSImportRoot, path.Join(r.TSImportRoot, "**/*", typeInfo.File))
-						return errors.Wrapf(err, "cannot find file for %s under ts import root: %s", typeInfo.File, r.TSImportRoot)
+					if found == "" {
+						log.Errorf("no file found for %s under %v", typeInfo.File, r.TSImportRoots)
+						return errors.Wrapf(err, "cannot find file for %s under ts import root: %s", typeInfo.File, r.TSImportRoots)
 					}
 
-					absoluteTsFileName := data.GetTSFileName(files[0])
+					absoluteTsFileName := data.GetTSFileName(found)
 					log.Debugf("absolute path for match found is: %s", absoluteTsFileName)
-					if r.TSImportRootAlias != "" { // if an alias has been provided
-						sourceFile = strings.ReplaceAll(absoluteTsFileName, r.TSImportRoot, r.TSImportRootAlias)
-						log.Debugf("replacing root alias %s for %s, result: %s", r.TSImportRootAlias, absoluteTsFileName, sourceFile)
+					if alias != "" { // if an alias has been provided
+						sourceFile = strings.ReplaceAll(absoluteTsFileName, foundAtRoot, alias)
+						log.Debugf("replacing root alias %s for %s, result: %s", alias, absoluteTsFileName, sourceFile)
 					} else {
 						log.Debugf("no root alias found, trying to get the relative path for %s", absoluteTsFileName)
 						absBase, err := filepath.Abs(base)
