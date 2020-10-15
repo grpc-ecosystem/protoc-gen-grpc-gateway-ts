@@ -4,7 +4,7 @@ import (
 	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	log "github.com/sirupsen/logrus" // nolint: depguard
 
-	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
+	"github.com/squareup/gap/cmd/protoc-gen-grpc-gateway-ts/data"
 )
 
 func (r *Registry) analyseFile(f *descriptorpb.FileDescriptorProto) *data.File {

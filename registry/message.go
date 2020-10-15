@@ -3,7 +3,7 @@ package registry
 import (
 	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 
-	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
+	"github.com/squareup/gap/cmd/protoc-gen-grpc-gateway-ts/data"
 )
 
 func (r *Registry) analyseMessage(fileData *data.File, packageName, fileName string, parents []string, message *descriptorpb.DescriptorProto) {

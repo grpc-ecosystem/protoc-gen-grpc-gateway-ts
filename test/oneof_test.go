@@ -1,7 +1,7 @@
 package test
 
 import (
-	"git.sqcorp.co/cash/gap/errors"
+	"github.com/squareup/gap/errors"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"os/exec"

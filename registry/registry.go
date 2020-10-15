@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"git.sqcorp.co/cash/gap/cmd/protoc-gen-grpc-gateway-ts/data"
-	"git.sqcorp.co/cash/gap/errors"
 	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	log "github.com/sirupsen/logrus" // nolint: depguard
+	"github.com/squareup/gap/cmd/protoc-gen-grpc-gateway-ts/data"
+	"github.com/squareup/gap/errors"
 )
 
 const (
