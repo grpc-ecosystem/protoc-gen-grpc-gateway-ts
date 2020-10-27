@@ -8,8 +8,8 @@ import (
 
 	"github.com/Masterminds/sprig"
 
-	"github.com/squareup/gap/cmd/protoc-gen-grpc-gateway-ts/data"
-	"github.com/squareup/gap/cmd/protoc-gen-grpc-gateway-ts/registry"
+	"github.com/squareup/protoc-gen-grpc-gateway-ts/data"
+	"github.com/squareup/protoc-gen-grpc-gateway-ts/registry"
 )
 
 const tmpl = `

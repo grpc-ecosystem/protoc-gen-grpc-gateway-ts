@@ -18,14 +18,8 @@
     "isolatedModules": true,
     "jsx": "react",
     "baseUrl": "../../../",
-    "paths": {
-      "gap/*": [
-        "./*"
-      ]
-    }
   },
   "include": [
-    "./*",
-    "../../../admin/lib/*"
+    "./*"
   ]
 }
