@@ -45,7 +45,7 @@ func (r *Registry) analyseService(fileData *data.File, packageName string, fileN
 
 		methodData := &data.Method{
 			Name: method.GetName(),
-			URL:  "/api/" + serviceURLPart + "/" + method.GetName(),
+			URL:  "/" + serviceURLPart + "/" + method.GetName(),
 			Input: &data.MethodArgument{
 				Type:       inputTypeFQName,
 				IsExternal: isInputTypeExternal,

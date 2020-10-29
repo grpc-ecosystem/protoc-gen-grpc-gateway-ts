@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/golang/protobuf/proto"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	log "github.com/sirupsen/logrus" // nolint: depguard
+	"google.golang.org/protobuf/proto"
 
 	"github.com/pkg/errors"
 	"github.com/squareup/protoc-gen-grpc-gateway-ts/generator"

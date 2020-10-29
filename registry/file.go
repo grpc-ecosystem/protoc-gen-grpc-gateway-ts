@@ -26,14 +26,6 @@ func (r *Registry) analyseFile(f *descriptorpb.FileDescriptorProto) *data.File {
 		r.analyseMessage(fileData, packageName, fileName, parents, message)
 	}
 
-	// when we have a service we will need to pull functions from gap admin to make the call
-	if len(f.Service) > 0 {
-		fileData.Dependencies = append(fileData.Dependencies, &data.Dependency{
-			ModuleIdentifier: "gap",
-			SourceFile:       "gap/admin/lib/useGapFetch",
-		})
-	}
-
 	// analyse services
 	for _, service := range f.Service {
 		r.analyseService(fileData, packageName, fileName, service)

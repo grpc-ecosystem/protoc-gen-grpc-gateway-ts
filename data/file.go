@@ -19,7 +19,7 @@ type File struct {
 	// ExternalDependingTypes stores the external dependenciees fully qualified name,
 	ExternalDependingTypes []string
 	// Services stores the information to render service
-	Services []*Service
+	Services Services
 	// Name is the name of the file
 	Name string
 	// TSFileName is the name of the output file

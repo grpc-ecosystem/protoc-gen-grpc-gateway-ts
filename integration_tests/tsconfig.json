@@ -1,0 +1,24 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "es2015"
+    ] ,
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "outDir": "tmp",
+    "target": "ES5",
+    "sourceMap": true,
+    "types" : [
+      "mocha",
+      "chai"
+    ],
+
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

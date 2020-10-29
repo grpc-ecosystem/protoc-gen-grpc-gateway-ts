@@ -1,0 +1,24 @@
+syntax = "proto3";
+package main;
+option go_package = "main";
+
+message UnaryRequest {
+  int32 counter = 1;
+}
+
+message UnaryResponse {
+  int32 result = 1;
+}
+
+message StreamingRequest {
+  int32 counter = 1;
+}
+
+message StreamingResponse {
+  int32 result = 1;
+}
+
+service CounterService {
+  rpc Increment (UnaryRequest) returns (UnaryResponse);
+  rpc StreamingIncrements (StreamingRequest) returns (stream StreamingResponse);
+}

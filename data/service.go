@@ -8,6 +8,33 @@ type Service struct {
 	Methods []*Method
 }
 
+// Services is an alias of Service array
+type Services []*Service
+
+// HasServerStreamingMethod indicates whether there is server side streaming calls inside any of the services
+func (s Services) HasServerStreamingMethod() bool {
+	for _, service := range s {
+		for _, method := range service.Methods {
+			if method.ServerStreaming {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// HasUnaryCallMethod indicates whether there is unary methods inside any of the services
+func (s Services) HasUnaryCallMethod() bool {
+	for _, service := range s {
+		for _, method := range service.Methods {
+			if !method.ServerStreaming && !method.ClientStreaming {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // NewService returns an initialised service
 func NewService() *Service {
 	return &Service{
