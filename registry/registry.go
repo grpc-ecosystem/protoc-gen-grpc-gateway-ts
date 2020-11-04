@@ -216,7 +216,7 @@ func (r *Registry) isExternalDependenciesOutsidePackage(fqTypeName, packageName 
 }
 
 // findRootAliasForPath iterate through all ts_import_roots and try to find an alias with the first matching the ts_import_root
-func (r *Registry) findRootAliasForPath(path string, predicate func(root string) (bool, error)) (foundAtRoot, alias string, err error) {
+func (r *Registry) findRootAliasForPath(predicate func(root string) (bool, error)) (foundAtRoot, alias string, err error) {
 	foundAtRoot = ""
 	alias = ""
 	for i, root := range r.TSImportRoots {
@@ -227,7 +227,7 @@ func (r *Registry) findRootAliasForPath(path string, predicate func(root string)
 
 		found, err := predicate(absRoot)
 		if err != nil {
-			return "", "", errors.Wrapf(err, "error verifying the root %s for path %s", absRoot, path)
+			return "", "", errors.Wrapf(err, "error verifying the root %s for", absRoot)
 		}
 
 		if found {
@@ -316,8 +316,8 @@ func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*dat
 				base := fileData.TSFileName
 				target := data.GetTSFileName(typeInfo.File)
 				sourceFile := ""
-				foundAtRoot, alias, err := r.findRootAliasForPath(target, func(absRoot string) (bool, error) {
-					completePath := filepath.Join(absRoot, target)
+				foundAtRoot, alias, err := r.findRootAliasForPath(func(absRoot string) (bool, error) {
+					completePath := filepath.Join(absRoot, typeInfo.File)
 					_, err := os.Stat(completePath)
 					if err != nil {
 						if os.IsNotExist(err) {

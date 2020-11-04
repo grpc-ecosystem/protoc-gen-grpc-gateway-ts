@@ -55,7 +55,7 @@ func (r *Registry) addFetchModuleDependencies(fileData *data.File) error {
 		return errors.Wrapf(err, "error looking up absolute path for fetch module directory %s", r.FetchModuleDirectory)
 	}
 
-	foundAtRoot, alias, err := r.findRootAliasForPath(r.FetchModuleDirectory, func(absRoot string) (bool, error) {
+	foundAtRoot, alias, err := r.findRootAliasForPath(func(absRoot string) (bool, error) {
 		return strings.HasPrefix(absDir, absRoot), nil
 
 	})
