@@ -2,12 +2,14 @@ package registry
 
 import (
 	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus" // nolint: depguard
-
 	"github.com/squareup/protoc-gen-grpc-gateway-ts/data"
+	"path/filepath"
+	"strings"
 )
 
-func (r *Registry) analyseFile(f *descriptorpb.FileDescriptorProto) *data.File {
+func (r *Registry) analyseFile(f *descriptorpb.FileDescriptorProto) (*data.File, error) {
 	log.Debugf("analysing %s", f.GetName())
 	fileData := data.NewFile()
 	fileName := f.GetName()
@@ -31,9 +33,50 @@ func (r *Registry) analyseFile(f *descriptorpb.FileDescriptorProto) *data.File {
 		r.analyseService(fileData, packageName, fileName, service)
 	}
 
+	// add fetch module after analysed all services in the file. will add dependencies if there is any
+	err := r.addFetchModuleDependencies(fileData)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error adding fetch module for file %s", fileData.Name)
+	}
+
 	r.analyseFilePackageTypeDependencies(fileData)
 
-	return fileData
+	return fileData, nil
+}
+
+func (r *Registry) addFetchModuleDependencies(fileData *data.File) error {
+	if !fileData.Services.NeedsFetchModule() {
+		log.Debugf("no services found for %s, skipping fetch module", fileData.Name)
+		return nil
+	}
+
+	absDir, err := filepath.Abs(r.FetchModuleDirectory)
+	if err != nil {
+		return errors.Wrapf(err, "error looking up absolute path for fetch module directory %s", r.FetchModuleDirectory)
+	}
+
+	foundAtRoot, alias, err := r.findRootAliasForPath(r.FetchModuleDirectory, func(absRoot string) (bool, error) {
+		return strings.HasPrefix(absDir, absRoot), nil
+
+	})
+	if err != nil {
+		return errors.Wrapf(err, "error looking up root alias for fetch module directory %s", r.FetchModuleDirectory)
+	}
+
+	fileName := filepath.Join(r.FetchModuleDirectory, r.FetchModuleFilename)
+
+	sourceFile, err := r.getSourceFileForImport(fileData.TSFileName, fileName, foundAtRoot, alias)
+	if err != nil {
+		return errors.Wrapf(err, "error replacing source file with alias for %s", fileName)
+	}
+
+	log.Debugf("added fetch dependency %s for %s", sourceFile, fileData.TSFileName)
+	fileData.Dependencies = append(fileData.Dependencies, &data.Dependency{
+		ModuleIdentifier: "fm",
+		SourceFile:       sourceFile,
+	})
+
+	return nil
 }
 
 func (r *Registry) analyseFilePackageTypeDependencies(fileData *data.File) {

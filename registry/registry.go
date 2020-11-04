@@ -20,6 +20,10 @@ const (
 	TSImportRootAliasParamsKey = "ts_import_root_aliases"
 	// TSImportRootSeparator separates the ts import root inside ts_import_roots & ts_import_root_aliases
 	TSImportRootSeparator = ";"
+	// FetchModuleDirectory is the parameter for directory where fetch module will live
+	FetchModuleDirectory = "fetch_module_directory"
+	// FetchModuleFileName is the file name for the individual fetch module
+	FetchModuleFileName = "fetch_module_filename"
 )
 
 // Registry analyse generation request, spits out the data the the rendering process
@@ -36,6 +40,15 @@ type Registry struct {
 
 	// TSImportRootAliases if not empty will substitutes the common import root when writing the import into the js file
 	TSImportRootAliases []string
+
+	// FetchModuleDirectory is the directory to place fetch module file
+	FetchModuleDirectory string
+
+	// FetchModuleFilename is the filename for the fetch module
+	FetchModuleFilename string
+
+	// FetchModuleR is the alias for fetch module directory
+	FetchModuleDirectoryAlias string
 }
 
 // NewRegistry initialise the registry and return the instance
@@ -47,11 +60,37 @@ func NewRegistry(paramsMap map[string]string) (*Registry, error) {
 		return nil, errors.Wrap(err, "error getting common import root information")
 	}
 
-	return &Registry{
-		Types:               make(map[string]*TypeInformation),
-		TSImportRoots:       tsImportRoots,
-		TSImportRootAliases: tsImportRootAliases,
-	}, nil
+	fetchModuleDirectory, fetchModuleFilename, err := getFetchModuleDirectory(paramsMap)
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting fetch module directory")
+	}
+	log.Debugf("found fetch module directory %s", fetchModuleDirectory)
+	log.Debugf("found fetch module name %s", fetchModuleFilename)
+
+	r := &Registry{
+		Types:                make(map[string]*TypeInformation),
+		TSImportRoots:        tsImportRoots,
+		TSImportRootAliases:  tsImportRootAliases,
+		FetchModuleDirectory: fetchModuleDirectory,
+		FetchModuleFilename:  fetchModuleFilename,
+	}
+
+	return r, nil
+}
+
+func getFetchModuleDirectory(paramsMap map[string]string) (fetchModuleDirectory string, fetchModuleFile string, err error) {
+	fetchModuleDirectory, ok := paramsMap[FetchModuleDirectory]
+
+	if !ok {
+		fetchModuleDirectory = "."
+	}
+
+	fetchModuleFile, ok = paramsMap[FetchModuleFileName]
+	if !ok {
+		fetchModuleFile = "fetch.pb.ts"
+	}
+
+	return fetchModuleDirectory, fetchModuleFile, nil
 }
 
 func getTSImportRootInformation(paramsMap map[string]string) ([]string, []string, error) {
@@ -142,7 +181,10 @@ func (r *Registry) Analyse(req *plugin.CodeGeneratorRequest) (map[string]*data.F
 	data := make(map[string]*data.File)
 	// analyse all files in the request first
 	for _, f := range files {
-		fileData := r.analyseFile(f)
+		fileData, err := r.analyseFile(f)
+		if err != nil {
+			return nil, errors.Wrapf(err, "error analysing file %s", *f.Name)
+		}
 		data[f.GetName()] = fileData
 	}
 
@@ -173,6 +215,86 @@ func (r *Registry) isExternalDependenciesOutsidePackage(fqTypeName, packageName 
 	return strings.Index(fqTypeName, "."+packageName) != 0 && strings.Index(fqTypeName, ".") == 0
 }
 
+// findRootAliasForPath iterate through all ts_import_roots and try to find an alias with the first matching the ts_import_root
+func (r *Registry) findRootAliasForPath(path string, predicate func(root string) (bool, error)) (foundAtRoot, alias string, err error) {
+	foundAtRoot = ""
+	alias = ""
+	for i, root := range r.TSImportRoots {
+		absRoot, err := filepath.Abs(root)
+		if err != nil {
+			return "", "", errors.Wrapf(err, "error looking up absolute path for %s", err)
+		}
+
+		found, err := predicate(absRoot)
+		if err != nil {
+			return "", "", errors.Wrapf(err, "error verifying the root %s for path %s", absRoot, path)
+		}
+
+		if found {
+			foundAtRoot = root
+			if i >= len(r.TSImportRootAliases) {
+				alias = ""
+			} else {
+				alias = r.TSImportRootAliases[i]
+			}
+
+			break
+		}
+	}
+
+	return foundAtRoot, alias, nil
+}
+
+// getSourceFileForImport will return source file for import use.
+// if alias is provided it will try to replace the absolute root with target's absolute path with alias
+// if no alias then it will try to return a relative path to the source file
+func (r *Registry) getSourceFileForImport(source, target, root, alias string) (string, error) {
+	ret := ""
+	absTarget, err := filepath.Abs(target)
+	if err != nil {
+		return "", errors.Wrapf(err, "error looking up absolute path for target %s", target)
+	}
+
+	if alias != "" { // if an alias has been provided, that means there's no need to get relative path
+		absRoot, err := filepath.Abs(root)
+		if err != nil {
+			return "", errors.Wrapf(err, "error looking up absolute path for root %s", root)
+		}
+
+		ret = strings.ReplaceAll(absTarget, absRoot, alias)
+		log.Debugf("replacing root alias %s for %s, result: %s", alias, target, ret)
+	} else { // return relative path here
+		log.Debugf("no root alias found, trying to get the relative path for %s", target)
+		absSource, err := filepath.Abs(source)
+		if err != nil {
+			return "", errors.Wrapf(err, "error looking up absolute directory with base dir: %s", source)
+		}
+
+		ret, err = filepath.Rel(filepath.Dir(absSource), absTarget)
+		if err != nil {
+			return "", errors.Wrapf(err, "error looking up relative path for source target %s", target)
+		}
+
+		slashPath := filepath.ToSlash(ret)
+		log.Debugf("got relative path %s for %s", target, slashPath)
+
+		if !strings.HasPrefix(slashPath, "../") { // sub directory will not have relative path ./, if this happens, prepend one
+			ret = filepath.FromSlash("./" + slashPath)
+		}
+
+		log.Debugf("no root alias found, trying to get the relative path for %s, result: %s", target, ret)
+	}
+
+	// remove .ts suffix if there's any
+	suffixIndex := strings.LastIndex(ret, ".ts")
+	if suffixIndex != -1 {
+		ret = ret[0:suffixIndex]
+	}
+
+	return ret, nil
+
+}
+
 func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*data.File) error {
 	for _, fileData := range filesData {
 		log.Debugf("collecting dependencies information for %s", fileData.TSFileName)
@@ -194,64 +316,33 @@ func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*dat
 				base := fileData.TSFileName
 				target := data.GetTSFileName(typeInfo.File)
 				sourceFile := ""
-				var err error
-				if !r.IsFileToGenerate(typeInfo.File) {
-					// iterate through the import paths
-					found := ""
-					foundAtRoot := ""
-					alias := ""
-					for i, root := range r.TSImportRoots {
-						found = filepath.Join(root, typeInfo.File)
-						if _, err := os.Stat(found); err == nil {
-							// file exists we have found the file already
-							foundAtRoot = root
-							alias = r.TSImportRootAliases[i]
-							break
-						}
-					}
-
-					if found == "" {
-						log.Errorf("no file found for %s under %v", typeInfo.File, r.TSImportRoots)
-						return errors.Wrapf(err, "cannot find file for %s under ts import root: %s", typeInfo.File, r.TSImportRoots)
-					}
-
-					absoluteTsFileName := data.GetTSFileName(found)
-					log.Debugf("absolute path for match found is: %s", absoluteTsFileName)
-					if alias != "" { // if an alias has been provided
-						sourceFile = strings.ReplaceAll(absoluteTsFileName, foundAtRoot, alias)
-						log.Debugf("replacing root alias %s for %s, result: %s", alias, absoluteTsFileName, sourceFile)
-					} else {
-						log.Debugf("no root alias found, trying to get the relative path for %s", absoluteTsFileName)
-						absBase, err := filepath.Abs(base)
-						if err != nil {
-							return errors.Wrapf(err, "error looking up absolute directory with base dir: %s", base)
-						}
-
-						sourceFile, err = filepath.Rel(filepath.Dir(absBase), absoluteTsFileName)
-						if err != nil {
-							return errors.Wrapf(err, "error looking up relative path for source file %s", absoluteTsFileName)
-						}
-
-						log.Debugf("no root alias found, trying to get the relative path for %s, result: %s", absoluteTsFileName, sourceFile)
-					}
-
-				} else {
-					sourceFile, err = filepath.Rel(filepath.Dir(base), target)
+				foundAtRoot, alias, err := r.findRootAliasForPath(target, func(absRoot string) (bool, error) {
+					completePath := filepath.Join(absRoot, target)
+					_, err := os.Stat(completePath)
 					if err != nil {
-						return errors.Wrapf(err, "error getting relative path between for %s, %s", base, target)
-					}
-					slashSourceFile := filepath.ToSlash(sourceFile)
-					if strings.Index(slashSourceFile, "../") != 0 {
-						slashSourceFile = "./" + slashSourceFile
+						if os.IsNotExist(err) {
+							return false, nil
+						}
+
+						return false, err
+
+					} else {
+						return true, nil
 					}
 
-					sourceFile = filepath.FromSlash(slashSourceFile)
+				})
+				if err != nil {
+					return errors.WithStack(err)
 				}
 
-				// remove ts suffix
-				suffixIndex := strings.LastIndex(sourceFile, ".ts")
-				sourceFile = sourceFile[0:suffixIndex]
+				if foundAtRoot != "" {
+					target = filepath.Join(foundAtRoot, target)
+				}
 
+				sourceFile, err = r.getSourceFileForImport(base, target, foundAtRoot, alias)
+				if err != nil {
+					return errors.Wrap(err, "error getting source file for import")
+				}
 				dependencies[identifier] = &data.Dependency{
 					ModuleIdentifier: data.GetModuleName(typeInfo.Package, typeInfo.File),
 					SourceFile:       sourceFile,

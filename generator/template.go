@@ -49,12 +49,12 @@ export type {{.Name}} = {
 {{define "services"}}{{range .}}export class {{.Name}} {
 {{- range .Methods}}  
 {{- if .ServerStreaming }}
-  static {{.Name}}(req: {{tsType .Input}}, entityNotifier?: NotifyStreamEntityArrival<{{tsType .Output}}>, initReq?: InitReq): Promise<void> {
-    return fetchStreamingRequest<{{tsType .Input}}, {{tsType .Output}}>("{{.URL}}", req, entityNotifier, initReq)
+  static {{.Name}}(req: {{tsType .Input}}, entityNotifier?: fm.NotifyStreamEntityArrival<{{tsType .Output}}>, initReq?: fm.InitReq): Promise<void> {
+    return fm.fetchStreamingRequest<{{tsType .Input}}, {{tsType .Output}}>("{{.URL}}", req, entityNotifier, initReq)
   }
 {{- else }}
-  static {{.Name}}(req: {{tsType .Input}}, initReq?: InitReq): Promise<{{tsType .Output}}> {
-    return fetchReq<{{tsType .Input}}, {{tsType .Output}}>("{{.URL}}", req, initReq)
+  static {{.Name}}(req: {{tsType .Input}}, initReq?: fm.InitReq): Promise<{{tsType .Output}}> {
+    return fm.fetchReq<{{tsType .Input}}, {{tsType .Output}}>("{{.URL}}", req, initReq)
   }
 {{- end}}
 {{- end}}
@@ -77,17 +77,19 @@ type OneOf<T> =
 {{end}}
 {{- if .Enums}}{{include "enums" .Enums}}{{end}}
 {{- if .Messages}}{{include "messages" .Messages}}{{end}}
-{{- if .Services}}{{include "comm" .Services}}{{end}}
 {{- if .Services}}{{include "services" .Services}}{{end}}
 `
 
-const commTmpl = `
+const fetchTmpl = `
+/*
+* This file is a generated Typescript file for GRPC Gateway, DO NOT MODIFY
+*/
+
 export interface InitReq extends RequestInit {
   pathPrefix?: string
 }
 
-{{- if .HasUnaryCallMethod }}
-function fetchReq<I, O>(path: string, body: I, init?: InitReq): Promise<O> {
+export function fetchReq<I, O>(path: string, body: I, init?: InitReq): Promise<O> {
   const {pathPrefix, ...req} = init || {}
 
   const url = pathPrefix ? ` + "`${pathPrefix}${path}`" + ` : path
@@ -100,9 +102,7 @@ function fetchReq<I, O>(path: string, body: I, init?: InitReq): Promise<O> {
     body: b
   }).then(r => r.json()) as Promise<O>
 }
-{{- end -}}
 
-{{- if .HasServerStreamingMethod }}
 // NotifyStreamEntityArrival is a callback that will be called on streaming entity arrival
 export type NotifyStreamEntityArrival<T> = (resp: T) => void
 
@@ -111,7 +111,7 @@ export type NotifyStreamEntityArrival<T> = (resp: T) => void
  * it takes NotifyStreamEntityArrival that lets users respond to entity arrival during the call
  * all entities will be returned as an array after the call finishes.
  **/
-async function fetchStreamingRequest<S, R>(path: string, body: S, callback?: NotifyStreamEntityArrival<R>, init?: InitReq) {
+export async function fetchStreamingRequest<S, R>(path: string, body: S, callback?: NotifyStreamEntityArrival<R>, init?: InitReq) {
   const {pathPrefix, ...req} = init || {}
   const url = pathPrefix ?` + "`${pathPrefix}${path}`" + ` : path
   const result = await fetch(url, {
@@ -201,13 +201,10 @@ function getNotifyEntityArrivalSink<T>(notifyCallback: NotifyStreamEntityArrival
     }
   })
 }
-
-{{- end -}}
 `
 
 // GetTemplate gets the templates to for the typescript file
 func GetTemplate(r *registry.Registry) *template.Template {
-
 	t := template.New("file")
 	t = t.Funcs(sprig.TxtFuncMap())
 
@@ -219,8 +216,13 @@ func GetTemplate(r *registry.Registry) *template.Template {
 	})
 
 	t = template.Must(t.Parse(tmpl))
-	template.Must(t.New("comm").Parse(commTmpl))
 	return t
+}
+
+// GetFetchModuleTemplate returns the go template for fetch module
+func GetFetchModuleTemplate() *template.Template {
+	t := template.New("fetch")
+	return template.Must(t.Parse(fetchTmpl))
 }
 
 // include is the include template functions copied from
