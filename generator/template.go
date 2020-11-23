@@ -3,6 +3,8 @@ package generator
 import (
 	"bytes"
 	"fmt"
+	log "github.com/sirupsen/logrus"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -50,11 +52,11 @@ export type {{.Name}} = {
 {{- range .Methods}}  
 {{- if .ServerStreaming }}
   static {{.Name}}(req: {{tsType .Input}}, entityNotifier?: fm.NotifyStreamEntityArrival<{{tsType .Output}}>, initReq?: fm.InitReq): Promise<void> {
-    return fm.fetchStreamingRequest<{{tsType .Input}}, {{tsType .Output}}>("{{.URL}}", req, entityNotifier, initReq)
+    return fm.fetchStreamingRequest<{{tsType .Input}}, {{tsType .Output}}>(` + "`{{renderURL .}}`" + `, entityNotifier, {...initReq, {{buildInitReq .}}})
   }
 {{- else }}
   static {{.Name}}(req: {{tsType .Input}}, initReq?: fm.InitReq): Promise<{{tsType .Output}}> {
-    return fm.fetchReq<{{tsType .Input}}, {{tsType .Output}}>("{{.URL}}", req, initReq)
+    return fm.fetchReq<{{tsType .Input}}, {{tsType .Output}}>(` + "`{{renderURL .}}`" + `, {...initReq, {{buildInitReq .}}})
   }
 {{- end}}
 {{- end}}
@@ -89,18 +91,12 @@ export interface InitReq extends RequestInit {
   pathPrefix?: string
 }
 
-export function fetchReq<I, O>(path: string, body: I, init?: InitReq): Promise<O> {
+export function fetchReq<I, O>(path: string, init?: InitReq): Promise<O> {
   const {pathPrefix, ...req} = init || {}
 
   const url = pathPrefix ? ` + "`${pathPrefix}${path}`" + ` : path
 
-  const b = JSON.stringify(body)
-
-  return fetch(url, {
-    ...req,
-    method: "POST",
-    body: b
-  }).then(r => r.json()) as Promise<O>
+  return fetch(url, req).then(r => r.json()) as Promise<O>
 }
 
 // NotifyStreamEntityArrival is a callback that will be called on streaming entity arrival
@@ -111,14 +107,10 @@ export type NotifyStreamEntityArrival<T> = (resp: T) => void
  * it takes NotifyStreamEntityArrival that lets users respond to entity arrival during the call
  * all entities will be returned as an array after the call finishes.
  **/
-export async function fetchStreamingRequest<S, R>(path: string, body: S, callback?: NotifyStreamEntityArrival<R>, init?: InitReq) {
+export async function fetchStreamingRequest<S, R>(path: string, callback?: NotifyStreamEntityArrival<R>, init?: InitReq) {
   const {pathPrefix, ...req} = init || {}
   const url = pathPrefix ?` + "`${pathPrefix}${path}`" + ` : path
-  const result = await fetch(url, {
-    ...req,
-    method: "Post",
-    body: JSON.stringify(body),
-  })
+  const result = await fetch(url, req)
   // needs to use the .ok to check the status of HTTP status code
   // http other than 200 will not throw an error, instead the .ok will become false.
   // see https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#
@@ -213,10 +205,43 @@ func GetTemplate(r *registry.Registry) *template.Template {
 		"tsType": func(fieldType data.Type) string {
 			return tsType(r, fieldType)
 		},
+		"renderURL":    renderURL,
+		"buildInitReq": buildInitReq,
 	})
 
 	t = template.Must(t.Parse(tmpl))
 	return t
+}
+
+func renderURL(method data.Method) string {
+	url := method.URL
+	reg := regexp.MustCompile("{([^}]+)}")
+	matches := reg.FindAllStringSubmatch(url, -1)
+	if len(matches) > 0 {
+		log.Debugf("url matches %v", matches)
+		for _, m := range matches {
+			expToReplace := m[0]
+			fieldName := m[1]
+			part := fmt.Sprintf(`${req["%s"]}`, fieldName)
+			url = strings.ReplaceAll(url, expToReplace, part)
+		}
+	}
+
+	return url
+}
+
+func buildInitReq(method data.Method) string {
+	httpMethod := method.HTTPMethod
+	m := `method: "` + httpMethod + `"`
+	fields := []string{m}
+	if method.HTTPRequestBody == nil || *method.HTTPRequestBody == "*" {
+		fields = append(fields, "body: JSON.stringify(req)")
+	} else if *method.HTTPRequestBody != "" {
+		fields = append(fields, `body: JSON.stringify(req["`+*method.HTTPRequestBody+`"])`)
+	}
+
+	return strings.Join(fields, ", ")
+
 }
 
 // GetFetchModuleTemplate returns the go template for fetch module

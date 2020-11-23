@@ -9,6 +9,7 @@ package main
 import (
 	context "context"
 	proto "github.com/golang/protobuf/proto"
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -217,32 +218,317 @@ func (x *StreamingResponse) GetResult() int32 {
 	return 0
 }
 
+type HttpGetRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Num int32 `protobuf:"varint,1,opt,name=num,proto3" json:"num,omitempty"`
+}
+
+func (x *HttpGetRequest) Reset() {
+	*x = HttpGetRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_service_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HttpGetRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HttpGetRequest) ProtoMessage() {}
+
+func (x *HttpGetRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HttpGetRequest.ProtoReflect.Descriptor instead.
+func (*HttpGetRequest) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *HttpGetRequest) GetNum() int32 {
+	if x != nil {
+		return x.Num
+	}
+	return 0
+}
+
+type HttpGetResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Result int32 `protobuf:"varint,1,opt,name=result,proto3" json:"result,omitempty"`
+}
+
+func (x *HttpGetResponse) Reset() {
+	*x = HttpGetResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_service_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HttpGetResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HttpGetResponse) ProtoMessage() {}
+
+func (x *HttpGetResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HttpGetResponse.ProtoReflect.Descriptor instead.
+func (*HttpGetResponse) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *HttpGetResponse) GetResult() int32 {
+	if x != nil {
+		return x.Result
+	}
+	return 0
+}
+
+type HttpPostRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	A   int32        `protobuf:"varint,1,opt,name=a,proto3" json:"a,omitempty"`
+	Req *PostRequest `protobuf:"bytes,2,opt,name=req,proto3" json:"req,omitempty"`
+	C   int32        `protobuf:"varint,3,opt,name=c,proto3" json:"c,omitempty"`
+}
+
+func (x *HttpPostRequest) Reset() {
+	*x = HttpPostRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_service_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HttpPostRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HttpPostRequest) ProtoMessage() {}
+
+func (x *HttpPostRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HttpPostRequest.ProtoReflect.Descriptor instead.
+func (*HttpPostRequest) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *HttpPostRequest) GetA() int32 {
+	if x != nil {
+		return x.A
+	}
+	return 0
+}
+
+func (x *HttpPostRequest) GetReq() *PostRequest {
+	if x != nil {
+		return x.Req
+	}
+	return nil
+}
+
+func (x *HttpPostRequest) GetC() int32 {
+	if x != nil {
+		return x.C
+	}
+	return 0
+}
+
+type PostRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	B int32 `protobuf:"varint,1,opt,name=b,proto3" json:"b,omitempty"`
+}
+
+func (x *PostRequest) Reset() {
+	*x = PostRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_service_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PostRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PostRequest) ProtoMessage() {}
+
+func (x *PostRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PostRequest.ProtoReflect.Descriptor instead.
+func (*PostRequest) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *PostRequest) GetB() int32 {
+	if x != nil {
+		return x.B
+	}
+	return 0
+}
+
+type HttpPostResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Result int32 `protobuf:"varint,1,opt,name=result,proto3" json:"result,omitempty"`
+}
+
+func (x *HttpPostResponse) Reset() {
+	*x = HttpPostResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_service_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HttpPostResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HttpPostResponse) ProtoMessage() {}
+
+func (x *HttpPostResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HttpPostResponse.ProtoReflect.Descriptor instead.
+func (*HttpPostResponse) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *HttpPostResponse) GetResult() int32 {
+	if x != nil {
+		return x.Result
+	}
+	return 0
+}
+
 var File_service_proto protoreflect.FileDescriptor
 
 var file_service_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12,
-	0x04, 0x6d, 0x61, 0x69, 0x6e, 0x22, 0x28, 0x0a, 0x0c, 0x55, 0x6e, 0x61, 0x72, 0x79, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x22,
-	0x27, 0x0a, 0x0d, 0x55, 0x6e, 0x61, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
-	0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x2c, 0x0a, 0x10, 0x53, 0x74, 0x72, 0x65,
-	0x61, 0x6d, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07,
-	0x63, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x63,
-	0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x22, 0x2b, 0x0a, 0x11, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d,
-	0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x72,
-	0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x72, 0x65, 0x73,
-	0x75, 0x6c, 0x74, 0x32, 0x90, 0x01, 0x0a, 0x0e, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x53,
-	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x34, 0x0a, 0x09, 0x49, 0x6e, 0x63, 0x72, 0x65, 0x6d,
-	0x65, 0x6e, 0x74, 0x12, 0x12, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x55, 0x6e, 0x61, 0x72, 0x79,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x13, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x55,
-	0x6e, 0x61, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x48, 0x0a, 0x13,
-	0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x69, 0x6e, 0x67, 0x49, 0x6e, 0x63, 0x72, 0x65, 0x6d, 0x65,
-	0x6e, 0x74, 0x73, 0x12, 0x16, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x53, 0x74, 0x72, 0x65, 0x61,
-	0x6d, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x6d, 0x61,
-	0x69, 0x6e, 0x2e, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x30, 0x01, 0x42, 0x06, 0x5a, 0x04, 0x6d, 0x61, 0x69, 0x6e, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x04, 0x6d, 0x61, 0x69, 0x6e, 0x1a, 0x1c, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x61, 0x70,
+	0x69, 0x2f, 0x61, 0x6e, 0x6e, 0x6f, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x22, 0x28, 0x0a, 0x0c, 0x55, 0x6e, 0x61, 0x72, 0x79, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x22, 0x27, 0x0a,
+	0x0d, 0x55, 0x6e, 0x61, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16,
+	0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06,
+	0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x2c, 0x0a, 0x10, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d,
+	0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f,
+	0x75, 0x6e, 0x74, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x63, 0x6f, 0x75,
+	0x6e, 0x74, 0x65, 0x72, 0x22, 0x2b, 0x0a, 0x11, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x69, 0x6e,
+	0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x73,
+	0x75, 0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c,
+	0x74, 0x22, 0x22, 0x0a, 0x0e, 0x48, 0x74, 0x74, 0x70, 0x47, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x6e, 0x75, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x03, 0x6e, 0x75, 0x6d, 0x22, 0x29, 0x0a, 0x0f, 0x48, 0x74, 0x74, 0x70, 0x47, 0x65, 0x74,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75,
+	0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74,
+	0x22, 0x52, 0x0a, 0x0f, 0x48, 0x74, 0x74, 0x70, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x0c, 0x0a, 0x01, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x01,
+	0x61, 0x12, 0x23, 0x0a, 0x03, 0x72, 0x65, 0x71, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x52, 0x03, 0x72, 0x65, 0x71, 0x12, 0x0c, 0x0a, 0x01, 0x63, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x01, 0x63, 0x22, 0x1b, 0x0a, 0x0b, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x0c, 0x0a, 0x01, 0x62, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x01,
+	0x62, 0x22, 0x2a, 0x0a, 0x10, 0x48, 0x74, 0x74, 0x70, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x32, 0xa6, 0x03,
+	0x0a, 0x0e, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
+	0x12, 0x34, 0x0a, 0x09, 0x49, 0x6e, 0x63, 0x72, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x12, 0x2e,
+	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x55, 0x6e, 0x61, 0x72, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x13, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x55, 0x6e, 0x61, 0x72, 0x79, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x48, 0x0a, 0x13, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d,
+	0x69, 0x6e, 0x67, 0x49, 0x6e, 0x63, 0x72, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x12, 0x16, 0x2e,
+	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x69, 0x6e, 0x67, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x53, 0x74, 0x72,
+	0x65, 0x61, 0x6d, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x30, 0x01,
+	0x12, 0x4a, 0x0a, 0x07, 0x48, 0x54, 0x54, 0x50, 0x47, 0x65, 0x74, 0x12, 0x14, 0x2e, 0x6d, 0x61,
+	0x69, 0x6e, 0x2e, 0x48, 0x74, 0x74, 0x70, 0x47, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x15, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x48, 0x74, 0x74, 0x70, 0x47, 0x65, 0x74,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x12, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x0c,
+	0x12, 0x0a, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x7b, 0x6e, 0x75, 0x6d, 0x7d, 0x12, 0x63, 0x0a, 0x1a,
+	0x48, 0x54, 0x54, 0x50, 0x50, 0x6f, 0x73, 0x74, 0x57, 0x69, 0x74, 0x68, 0x4e, 0x65, 0x73, 0x74,
+	0x65, 0x64, 0x42, 0x6f, 0x64, 0x79, 0x50, 0x61, 0x74, 0x68, 0x12, 0x15, 0x2e, 0x6d, 0x61, 0x69,
+	0x6e, 0x2e, 0x48, 0x74, 0x74, 0x70, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x16, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x48, 0x74, 0x74, 0x70, 0x50, 0x6f, 0x73,
+	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x16, 0x82, 0xd3, 0xe4, 0x93, 0x02,
+	0x10, 0x22, 0x09, 0x2f, 0x70, 0x6f, 0x73, 0x74, 0x2f, 0x7b, 0x61, 0x7d, 0x3a, 0x03, 0x72, 0x65,
+	0x71, 0x12, 0x63, 0x0a, 0x18, 0x48, 0x54, 0x54, 0x50, 0x50, 0x6f, 0x73, 0x74, 0x57, 0x69, 0x74,
+	0x68, 0x53, 0x74, 0x61, 0x72, 0x42, 0x6f, 0x64, 0x79, 0x50, 0x61, 0x74, 0x68, 0x12, 0x15, 0x2e,
+	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x48, 0x74, 0x74, 0x70, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x48, 0x74, 0x74, 0x70,
+	0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x18, 0x82, 0xd3,
+	0xe4, 0x93, 0x02, 0x12, 0x22, 0x0d, 0x2f, 0x70, 0x6f, 0x73, 0x74, 0x2f, 0x7b, 0x61, 0x7d, 0x2f,
+	0x7b, 0x63, 0x7d, 0x3a, 0x01, 0x2a, 0x42, 0x08, 0x5a, 0x06, 0x2e, 0x3b, 0x6d, 0x61, 0x69, 0x6e,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -257,23 +543,35 @@ func file_service_proto_rawDescGZIP() []byte {
 	return file_service_proto_rawDescData
 }
 
-var file_service_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_service_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_service_proto_goTypes = []interface{}{
 	(*UnaryRequest)(nil),      // 0: main.UnaryRequest
 	(*UnaryResponse)(nil),     // 1: main.UnaryResponse
 	(*StreamingRequest)(nil),  // 2: main.StreamingRequest
 	(*StreamingResponse)(nil), // 3: main.StreamingResponse
+	(*HttpGetRequest)(nil),    // 4: main.HttpGetRequest
+	(*HttpGetResponse)(nil),   // 5: main.HttpGetResponse
+	(*HttpPostRequest)(nil),   // 6: main.HttpPostRequest
+	(*PostRequest)(nil),       // 7: main.PostRequest
+	(*HttpPostResponse)(nil),  // 8: main.HttpPostResponse
 }
 var file_service_proto_depIdxs = []int32{
-	0, // 0: main.CounterService.Increment:input_type -> main.UnaryRequest
-	2, // 1: main.CounterService.StreamingIncrements:input_type -> main.StreamingRequest
-	1, // 2: main.CounterService.Increment:output_type -> main.UnaryResponse
-	3, // 3: main.CounterService.StreamingIncrements:output_type -> main.StreamingResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	7, // 0: main.HttpPostRequest.req:type_name -> main.PostRequest
+	0, // 1: main.CounterService.Increment:input_type -> main.UnaryRequest
+	2, // 2: main.CounterService.StreamingIncrements:input_type -> main.StreamingRequest
+	4, // 3: main.CounterService.HTTPGet:input_type -> main.HttpGetRequest
+	6, // 4: main.CounterService.HTTPPostWithNestedBodyPath:input_type -> main.HttpPostRequest
+	6, // 5: main.CounterService.HTTPPostWithStarBodyPath:input_type -> main.HttpPostRequest
+	1, // 6: main.CounterService.Increment:output_type -> main.UnaryResponse
+	3, // 7: main.CounterService.StreamingIncrements:output_type -> main.StreamingResponse
+	5, // 8: main.CounterService.HTTPGet:output_type -> main.HttpGetResponse
+	8, // 9: main.CounterService.HTTPPostWithNestedBodyPath:output_type -> main.HttpPostResponse
+	8, // 10: main.CounterService.HTTPPostWithStarBodyPath:output_type -> main.HttpPostResponse
+	6, // [6:11] is the sub-list for method output_type
+	1, // [1:6] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_service_proto_init() }
@@ -330,6 +628,66 @@ func file_service_proto_init() {
 				return nil
 			}
 		}
+		file_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HttpGetRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HttpGetResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_service_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HttpPostRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_service_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PostRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_service_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HttpPostResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -337,7 +695,7 @@ func file_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_service_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -365,6 +723,9 @@ const _ = grpc.SupportPackageIsVersion6
 type CounterServiceClient interface {
 	Increment(ctx context.Context, in *UnaryRequest, opts ...grpc.CallOption) (*UnaryResponse, error)
 	StreamingIncrements(ctx context.Context, in *StreamingRequest, opts ...grpc.CallOption) (CounterService_StreamingIncrementsClient, error)
+	HTTPGet(ctx context.Context, in *HttpGetRequest, opts ...grpc.CallOption) (*HttpGetResponse, error)
+	HTTPPostWithNestedBodyPath(ctx context.Context, in *HttpPostRequest, opts ...grpc.CallOption) (*HttpPostResponse, error)
+	HTTPPostWithStarBodyPath(ctx context.Context, in *HttpPostRequest, opts ...grpc.CallOption) (*HttpPostResponse, error)
 }
 
 type counterServiceClient struct {
@@ -416,10 +777,40 @@ func (x *counterServiceStreamingIncrementsClient) Recv() (*StreamingResponse, er
 	return m, nil
 }
 
+func (c *counterServiceClient) HTTPGet(ctx context.Context, in *HttpGetRequest, opts ...grpc.CallOption) (*HttpGetResponse, error) {
+	out := new(HttpGetResponse)
+	err := c.cc.Invoke(ctx, "/main.CounterService/HTTPGet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *counterServiceClient) HTTPPostWithNestedBodyPath(ctx context.Context, in *HttpPostRequest, opts ...grpc.CallOption) (*HttpPostResponse, error) {
+	out := new(HttpPostResponse)
+	err := c.cc.Invoke(ctx, "/main.CounterService/HTTPPostWithNestedBodyPath", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *counterServiceClient) HTTPPostWithStarBodyPath(ctx context.Context, in *HttpPostRequest, opts ...grpc.CallOption) (*HttpPostResponse, error) {
+	out := new(HttpPostResponse)
+	err := c.cc.Invoke(ctx, "/main.CounterService/HTTPPostWithStarBodyPath", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CounterServiceServer is the server API for CounterService service.
 type CounterServiceServer interface {
 	Increment(context.Context, *UnaryRequest) (*UnaryResponse, error)
 	StreamingIncrements(*StreamingRequest, CounterService_StreamingIncrementsServer) error
+	HTTPGet(context.Context, *HttpGetRequest) (*HttpGetResponse, error)
+	HTTPPostWithNestedBodyPath(context.Context, *HttpPostRequest) (*HttpPostResponse, error)
+	HTTPPostWithStarBodyPath(context.Context, *HttpPostRequest) (*HttpPostResponse, error)
 }
 
 // UnimplementedCounterServiceServer can be embedded to have forward compatible implementations.
@@ -431,6 +822,15 @@ func (*UnimplementedCounterServiceServer) Increment(context.Context, *UnaryReque
 }
 func (*UnimplementedCounterServiceServer) StreamingIncrements(*StreamingRequest, CounterService_StreamingIncrementsServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamingIncrements not implemented")
+}
+func (*UnimplementedCounterServiceServer) HTTPGet(context.Context, *HttpGetRequest) (*HttpGetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HTTPGet not implemented")
+}
+func (*UnimplementedCounterServiceServer) HTTPPostWithNestedBodyPath(context.Context, *HttpPostRequest) (*HttpPostResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HTTPPostWithNestedBodyPath not implemented")
+}
+func (*UnimplementedCounterServiceServer) HTTPPostWithStarBodyPath(context.Context, *HttpPostRequest) (*HttpPostResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HTTPPostWithStarBodyPath not implemented")
 }
 
 func RegisterCounterServiceServer(s *grpc.Server, srv CounterServiceServer) {
@@ -476,6 +876,60 @@ func (x *counterServiceStreamingIncrementsServer) Send(m *StreamingResponse) err
 	return x.ServerStream.SendMsg(m)
 }
 
+func _CounterService_HTTPGet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HttpGetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CounterServiceServer).HTTPGet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/main.CounterService/HTTPGet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CounterServiceServer).HTTPGet(ctx, req.(*HttpGetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CounterService_HTTPPostWithNestedBodyPath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HttpPostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CounterServiceServer).HTTPPostWithNestedBodyPath(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/main.CounterService/HTTPPostWithNestedBodyPath",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CounterServiceServer).HTTPPostWithNestedBodyPath(ctx, req.(*HttpPostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CounterService_HTTPPostWithStarBodyPath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HttpPostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CounterServiceServer).HTTPPostWithStarBodyPath(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/main.CounterService/HTTPPostWithStarBodyPath",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CounterServiceServer).HTTPPostWithStarBodyPath(ctx, req.(*HttpPostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _CounterService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "main.CounterService",
 	HandlerType: (*CounterServiceServer)(nil),
@@ -483,6 +937,18 @@ var _CounterService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Increment",
 			Handler:    _CounterService_Increment_Handler,
+		},
+		{
+			MethodName: "HTTPGet",
+			Handler:    _CounterService_HTTPGet_Handler,
+		},
+		{
+			MethodName: "HTTPPostWithNestedBodyPath",
+			Handler:    _CounterService_HTTPPostWithNestedBodyPath_Handler,
+		},
+		{
+			MethodName: "HTTPPostWithStarBodyPath",
+			Handler:    _CounterService_HTTPPostWithStarBodyPath_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

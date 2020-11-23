@@ -14,4 +14,20 @@ describe("test grpc-gateway-ts communication", () => {
 
     expect(response).to.deep.equal([2,3,4,5,6])
   })
+
+  it('http get check request', async () => {
+    const result = await CounterService.HTTPGet({num: 10}, {pathPrefix: "http://localhost:8081"})
+    expect(result.result).to.equal(11)
+  })
+
+  it('http post body check request with nested body path', async () => {
+    const result = await CounterService.HTTPPostWithNestedBodyPath({a: 10, req: { b: 15 }}, {pathPrefix: "http://localhost:8081"})
+    expect(result.result).to.equal(25)
+  })
+
+
+  it('http post body check request with star in path', async () => {
+    const result = await CounterService.HTTPPostWithStarBodyPath({a: 10, req: { b: 15 }, c: 23}, {pathPrefix: "http://localhost:8081"})
+    expect(result.result).to.equal(48)
+  })
 })

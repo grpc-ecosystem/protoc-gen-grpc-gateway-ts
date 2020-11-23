@@ -62,6 +62,10 @@ type Method struct {
 	ServerStreaming bool
 	// ClientStreaming indicates the RPC call is a client streaming call, which will not be supported by GRPC Gateway
 	ClientStreaming bool
+	// HTTPMethod indicates the http method for this function
+	HTTPMethod string
+	// HTTPBody is the path for request body in the body's payload
+	HTTPRequestBody *string
 }
 
 // MethodArgument stores the type information about method argument

@@ -31,3 +31,21 @@ func (r *RealCounterService) StreamingIncrements(req *StreamingRequest, service 
 
 	return nil
 }
+
+func (r *RealCounterService) HTTPGet(ctx context.Context, req *HttpGetRequest) (*HttpGetResponse, error) {
+	return &HttpGetResponse{
+		Result: req.Num + 1,
+	}, nil
+}
+
+func (r *RealCounterService) HTTPPostWithNestedBodyPath(ctx context.Context, in *HttpPostRequest) (*HttpPostResponse, error) {
+	return &HttpPostResponse{
+		Result: in.A + in.Req.B,
+	}, nil
+}
+
+func (r *RealCounterService) HTTPPostWithStarBodyPath(ctx context.Context, in *HttpPostRequest) (*HttpPostResponse, error) {
+	return &HttpPostResponse{
+		Result: in.A + in.Req.B + in.C,
+	}, nil
+}
