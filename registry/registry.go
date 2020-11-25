@@ -24,6 +24,8 @@ const (
 	FetchModuleDirectory = "fetch_module_directory"
 	// FetchModuleFileName is the file name for the individual fetch module
 	FetchModuleFileName = "fetch_module_filename"
+	// UseProtoNames will make the generator to generate field name the same as defined in the proto
+	UseProtoNames = "use_proto_names"
 )
 
 // Registry analyse generation request, spits out the data the the rendering process
@@ -49,6 +51,9 @@ type Registry struct {
 
 	// FetchModuleR is the alias for fetch module directory
 	FetchModuleDirectoryAlias string
+
+	// UseProtoNames will cause the generator to generate field name the same as defined in the proto
+	UseProtoNames bool
 }
 
 // NewRegistry initialise the registry and return the instance
@@ -67,12 +72,21 @@ func NewRegistry(paramsMap map[string]string) (*Registry, error) {
 	log.Debugf("found fetch module directory %s", fetchModuleDirectory)
 	log.Debugf("found fetch module name %s", fetchModuleFilename)
 
+	useProtoNames := false
+
+	useProtoNamesVal, ok := paramsMap[UseProtoNames]
+	if ok {
+		// default to true if not disabled specifi
+		useProtoNames = useProtoNamesVal == "true"
+	}
+
 	r := &Registry{
 		Types:                make(map[string]*TypeInformation),
 		TSImportRoots:        tsImportRoots,
 		TSImportRootAliases:  tsImportRootAliases,
 		FetchModuleDirectory: fetchModuleDirectory,
 		FetchModuleFilename:  fetchModuleFilename,
+		UseProtoNames:        useProtoNames,
 	}
 
 	return r, nil

@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig"
+	"github.com/iancoleman/strcase"
 
 	"github.com/squareup/protoc-gen-grpc-gateway-ts/data"
 	"github.com/squareup/protoc-gen-grpc-gateway-ts/registry"
@@ -32,17 +33,17 @@ const tmpl = `
 {{- if .HasOneOfFields}}
 type Base{{.Name}} = {
 {{- range .NonOneOfFields}}
-  {{.Name}}?: {{tsType .}}
+  {{fieldName .Name}}?: {{tsType .}}
 {{- end}}
 }
 
 export type {{.Name}} = Base{{.Name}}
-{{range $groupId, $fields := .OneOfFieldsGroups}}  & OneOf<{ {{range $index, $field := $fields}}{{$field.Name}}: {{tsType $field}}{{if (lt (add $index 1) (len $fields))}}; {{end}}{{end}} }>
+{{range $groupId, $fields := .OneOfFieldsGroups}}  & OneOf<{ {{range $index, $field := $fields}}{{fieldName $field.Name}}: {{tsType $field}}{{if (lt (add $index 1) (len $fields))}}; {{end}}{{end}} }>
 {{end}}
 {{- else -}}
 export type {{.Name}} = {
 {{- range .Fields}}
-  {{.Name}}?: {{tsType .}}
+  {{fieldName .Name}}?: {{tsType .}}
 {{- end}}
 }
 {{end}}
@@ -207,6 +208,13 @@ func GetTemplate(r *registry.Registry) *template.Template {
 		},
 		"renderURL":    renderURL,
 		"buildInitReq": buildInitReq,
+		"fieldName": func(name string) string {
+			if r.UseProtoNames {
+				return name
+			}
+
+			return strcase.ToLowerCamel(name)
+		},
 	})
 
 	t = template.Must(t.Parse(tmpl))

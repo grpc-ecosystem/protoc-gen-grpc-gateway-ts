@@ -61,5 +61,4 @@ jobs:
       - name: Run integration tests
         run: |
           cd integration_tests
-          make client-protos
           ./scripts/test-ci.sh

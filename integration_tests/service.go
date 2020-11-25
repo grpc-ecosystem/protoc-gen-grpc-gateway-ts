@@ -40,12 +40,12 @@ func (r *RealCounterService) HTTPGet(ctx context.Context, req *HttpGetRequest) (
 
 func (r *RealCounterService) HTTPPostWithNestedBodyPath(ctx context.Context, in *HttpPostRequest) (*HttpPostResponse, error) {
 	return &HttpPostResponse{
-		Result: in.A + in.Req.B,
+		PostResult: in.A + in.Req.B,
 	}, nil
 }
 
 func (r *RealCounterService) HTTPPostWithStarBodyPath(ctx context.Context, in *HttpPostRequest) (*HttpPostResponse, error) {
 	return &HttpPostResponse{
-		Result: in.A + in.Req.B + in.C,
+		PostResult: in.A + in.Req.B + in.C,
 	}, nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 	"net"
@@ -35,6 +36,8 @@ func allowCORS(h http.Handler) http.Handler {
 }
 
 func main() {
+	origName := flag.Bool("orig", false, "tell server to use origin name in jsonpb")
+	flag.Parse()
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -62,7 +65,9 @@ func main() {
 
 	// Register gRPC server endpoint
 	// Note: Make sure the gRPC server is running properly and accessible
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+		OrigName: *origName,
+	}))
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err = RegisterCounterServiceHandlerFromEndpoint(ctx, mux, "localhost:9000", opts)
 	if err != nil {

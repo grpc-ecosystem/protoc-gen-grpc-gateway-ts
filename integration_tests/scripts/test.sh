@@ -1,7 +1,7 @@
 #!/bin/bash
 
-go run ./ &
-pid=$!
+source ./scripts/source.sh
 
-./node_modules/.bin/karma start karma.conf.js
-pkill -P $pid
+CONF="karma.conf.js"
+
+runTest ${1:-false} $CONF

@@ -39,7 +39,7 @@ message PostRequest {
 }
 
 message HttpPostResponse {
-  int32 result = 1;
+  int32 post_result = 1;
 }
 
 service CounterService {

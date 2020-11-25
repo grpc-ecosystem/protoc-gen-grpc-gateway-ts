@@ -16,7 +16,7 @@
       "mocha",
       "chai"
     ],
-
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules"
