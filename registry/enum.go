@@ -7,9 +7,8 @@ import (
 )
 
 func (r *Registry) analyseEnumType(fileData *data.File, packageName, fileName string, parents []string, enum *descriptorpb.EnumDescriptorProto) {
-	parentsPrefix := r.getParentPrefixes(parents)
 	packageIdentifier := r.getNameOfPackageLevelIdentifier(parents, enum.GetName())
-	fqName := "." + packageName + "." + parentsPrefix + enum.GetName()
+	fqName := r.getFullQualifiedName(packageName, parents, enum.GetName())
 	protoType := descriptorpb.FieldDescriptorProto_TYPE_ENUM
 	r.Types[fqName] = &TypeInformation{
 		FullyQualifiedName: fqName,

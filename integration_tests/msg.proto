@@ -1,0 +1,11 @@
+syntax = "proto3";
+option go_package = ".;main";
+
+
+message ExternalRequest {
+  string content = 1;
+}
+
+message ExternalResponse {
+  string result = 2;
+}

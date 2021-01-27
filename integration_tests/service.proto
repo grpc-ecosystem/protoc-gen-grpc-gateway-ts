@@ -3,6 +3,7 @@ package main;
 option go_package = ".;main";
 
 import "google/api/annotations.proto";
+import "msg.proto";
 
 message UnaryRequest {
   int32 counter = 1;
@@ -60,4 +61,5 @@ service CounterService {
       body: "*"
     };
   }
+  rpc ExternalMessage (ExternalRequest) returns (ExternalResponse);
 }

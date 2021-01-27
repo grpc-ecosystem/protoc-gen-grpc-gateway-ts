@@ -42,4 +42,10 @@ describe("test grpc-gateway-ts communication", () => {
     expect(getField(result, 'post_result')).to.equal(48)
   })
 
+  it('able to communicate with external message reference without package defined', async () => {
+    const result = await CounterService.ExternalMessage({ content: "hello" }, {pathPrefix: "http://localhost:8081"})
+    expect(getField(result, 'result')).to.equal("hello!!")
+  })
+
+
 })

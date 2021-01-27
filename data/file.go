@@ -86,9 +86,12 @@ func GetModuleName(packageName, fileName string) string {
 	name := baseName[0 : len(baseName)-len(ext)]
 	packageParts := strings.Split(packageName, ".")
 
-	for i, p := range packageParts {
-		packageParts[i] = strings.ToUpper(p[:1]) + p[1:]
+	if packageName != "" {
+		for i, p := range packageParts {
+			packageParts[i] = strings.ToUpper(p[:1]) + p[1:]
+		}
 	}
+
 	return strings.Join(packageParts, "") + strings.ToUpper(name[:1]) + name[1:]
 }
 

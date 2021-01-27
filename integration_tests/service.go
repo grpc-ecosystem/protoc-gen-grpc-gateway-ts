@@ -7,6 +7,12 @@ import (
 
 type RealCounterService struct{}
 
+func (r *RealCounterService) ExternalMessage(ctx context.Context, request *ExternalRequest) (*ExternalResponse, error) {
+	return &ExternalResponse{
+		Result: request.Content + "!!",
+	}, nil
+}
+
 func (r *RealCounterService) Increment(c context.Context, req *UnaryRequest) (*UnaryResponse, error) {
 	return &UnaryResponse{
 		Result: req.Counter + 1,

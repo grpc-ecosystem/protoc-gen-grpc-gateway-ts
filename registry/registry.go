@@ -217,12 +217,21 @@ func (r *Registry) getNameOfPackageLevelIdentifier(parents []string, name string
 	return strings.Join(parents, "") + name
 }
 
-func (r *Registry) getParentPrefixes(parents []string) string {
-	parentsPrefix := ""
-	if len(parents) > 0 {
-		parentsPrefix = strings.Join(parents, ".") + "."
+func (r *Registry) getFullQualifiedName(packageName string, parents []string, name string) string {
+	namesToConcat := make([]string, 0, 2+len(parents))
+
+	if packageName != "" {
+		namesToConcat = append(namesToConcat, packageName)
 	}
-	return parentsPrefix
+
+	if len(parents) > 0 {
+		namesToConcat = append(namesToConcat, parents...)
+	}
+
+	namesToConcat = append(namesToConcat, name)
+
+	return "." + strings.Join(namesToConcat, ".")
+
 }
 
 func (r *Registry) isExternalDependenciesOutsidePackage(fqTypeName, packageName string) bool {

@@ -7,9 +7,9 @@ import (
 )
 
 func (r *Registry) analyseMessage(fileData *data.File, packageName, fileName string, parents []string, message *descriptorpb.DescriptorProto) {
-	parentsPrefix := r.getParentPrefixes(parents)
 	packageIdentifier := r.getNameOfPackageLevelIdentifier(parents, message.GetName())
-	fqName := "." + packageName + "." + parentsPrefix + message.GetName()
+
+	fqName := r.getFullQualifiedName(packageName, parents, message.GetName()) // "." + packageName + "." + parentsPrefix + message.GetName()
 	protoType := descriptorpb.FieldDescriptorProto_TYPE_MESSAGE
 
 	typeInfo := &TypeInformation{
