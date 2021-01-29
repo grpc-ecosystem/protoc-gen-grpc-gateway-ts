@@ -9,12 +9,26 @@
 3. POJO request construction guarded by message type definitions, which is way easier compare to `grpc-web`
 4. No need to use swagger/open api to generate client code for the web.
 
+## Get Started
+
+### Install `protoc-gen-grpc-gateway-ts`
+You will need to install `protoc-gen-grpc-gateway-ts` before it could be picked up by the `protoc` command. Just run `cd protoc-gen-grpc-gateway-ts; go install .`
+
+### Sample Usage
+`protoc-gen-grpc-gateway-ts` will be used along with the `protoc` command. A sample invocation looks like the following:
+
+`protoc --grpc-gateway-ts_out=ts_import_roots=$(pwd),ts_import_root_aliases=base:. input.proto`
+
+As a result the generated file will be `input.pb.ts` in the same directory. 
+
 ## Parameters:
 ### `ts_import_roots`
 Since a protoc plugin do not get the import path information as what's specified in `protoc -I`, this parameter gives the plugin the same information to figure out where a specific type is coming from so that it can generate `import` statement at the top of the generated typescript file. Defaults to `$(pwd)`
 
 ### `ts_import_root_aliases`
-If a project has setup alias for their import. This parameter can be used to keep up with the project setup. It will print out alias instead of relative path in the import statement. Default is "".
+If a project has setup alias for their import. This parameter can be used to keep up with the project setup. It will print out alias instead of relative path in the import statement. Default is "". 
+
+`ts_import_roots` & `ts_import_root_aliases` are useful when you have setup import alias in your project with the project asset bundler, e.g. Webpack.
 
 ### `fetch_module_directory` and `fetch_module_filename`
 `protoc-gen-grpc-gateway-ts` will a shared typescript file with communication functions. These two parameters together will determine where the fetch module file is located. Default to `$(pwd)/fetch.pb.ts`
@@ -31,6 +45,7 @@ Defines the logging levels. Default to info. Valid values are: debug, info, warn
 ## Examples:
 The following shows how to use the generated typescript code.
 
+Proto file: `counter.proto`
 ```proto
 // file: counter.proto
 message Request {
@@ -46,6 +61,12 @@ service CounterService {
   rpc Increase10X(Request) returns (stream Response);
 }
 ```
+
+Run the following command to generate the Typescript client:
+
+`protoc --grpc-gateway-ts_out=. counter.proto`
+
+Then a `counter.pb.ts` file will be available at the current directory. You can use it like the following example.
 
 ```typescript
 import {CounterService} from './counter.pb'
@@ -69,13 +90,20 @@ async function increaseRepeatedly(base: number): Promise<number[]> {
 
 ```
 
-License
+##License
 ```text
 Copyright 2020 Square, Inc.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+   http://www.apache.org/licenses/LICENSE-2.0
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```
+
