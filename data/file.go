@@ -57,6 +57,10 @@ func (f *File) TrackPackageNonScalarType(t Type) {
 	}
 }
 
+func (f *File) IsEmpty() bool {
+	return len(f.Enums) == 0 && len(f.Messages) == 0 && len(f.Services) == 0
+}
+
 // NewFile returns an initialised new file
 func NewFile() *File {
 	return &File{

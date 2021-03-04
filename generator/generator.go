@@ -2,6 +2,7 @@ package generator
 
 import (
 	"bytes"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -77,9 +78,13 @@ func (t *TypeScriptGRPCGatewayGenerator) Generate(req *plugin.CodeGeneratorReque
 func (t *TypeScriptGRPCGatewayGenerator) generateFile(fileData *data.File, tmpl *template.Template) (*plugin.CodeGeneratorResponse_File, error) {
 	w := bytes.NewBufferString("")
 
-	err := tmpl.Execute(w, fileData)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error generating ts file for %s", fileData.Name)
+	if fileData.IsEmpty() {
+		w.Write([]byte(fmt.Sprintln("export default {}")))
+	} else {
+		err := tmpl.Execute(w, fileData)
+		if err != nil {
+			return nil, errors.Wrapf(err, "error generating ts file for %s", fileData.Name)
+		}
 	}
 
 	fileName := fileData.TSFileName

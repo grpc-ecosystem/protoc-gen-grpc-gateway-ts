@@ -1,4 +1,5 @@
 import {CounterService} from "./service.pb";
+import _ from './empty.pb';
 import camelCase from 'lodash.camelcase';
 import { pathOr } from 'ramda'
 import {expect} from 'chai'
