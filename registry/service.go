@@ -2,11 +2,12 @@ package registry
 
 import (
 	"fmt"
+
 	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/squareup/protoc-gen-grpc-gateway-ts/data"
+	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
 )
 
 func getHTTPAnnotation(m *descriptorpb.MethodDescriptorProto) *annotations.HttpRule {

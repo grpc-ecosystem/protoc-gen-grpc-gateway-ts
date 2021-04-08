@@ -1,4 +1,4 @@
-module github.com/squareup/protoc-gen-grpc-gateway-ts
+module github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts
 
 go 1.14
 

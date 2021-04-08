@@ -1,12 +1,13 @@
 package registry
 
 import (
-	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus" // nolint: depguard
-	"github.com/squareup/protoc-gen-grpc-gateway-ts/data"
 	"path/filepath"
 	"strings"
+
+	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
+	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus" // nolint: depguard
 )
 
 func (r *Registry) analyseFile(f *descriptorpb.FileDescriptorProto) (*data.File, error) {
