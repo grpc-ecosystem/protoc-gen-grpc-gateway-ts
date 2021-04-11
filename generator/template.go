@@ -3,16 +3,17 @@ package generator
 import (
 	"bytes"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
 	"text/template"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/Masterminds/sprig"
 	"github.com/iancoleman/strcase"
 
-	"github.com/squareup/protoc-gen-grpc-gateway-ts/data"
-	"github.com/squareup/protoc-gen-grpc-gateway-ts/registry"
+	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
+	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/registry"
 )
 
 const tmpl = `

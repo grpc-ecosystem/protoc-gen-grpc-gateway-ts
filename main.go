@@ -9,8 +9,8 @@ import (
 	log "github.com/sirupsen/logrus" // nolint: depguard
 	"google.golang.org/protobuf/proto"
 
+	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/generator"
 	"github.com/pkg/errors"
-	"github.com/squareup/protoc-gen-grpc-gateway-ts/generator"
 )
 
 func decodeReq() *plugin.CodeGeneratorRequest {
