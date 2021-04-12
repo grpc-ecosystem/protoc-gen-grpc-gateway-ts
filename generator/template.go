@@ -207,7 +207,9 @@ func GetTemplate(r *registry.Registry) *template.Template {
 		"tsType": func(fieldType data.Type) string {
 			return tsType(r, fieldType)
 		},
-		"renderURL":    renderURL,
+		"renderURL": func(method data.Method) string {
+			return renderURL(r, method)
+		},
 		"buildInitReq": buildInitReq,
 		"fieldName": func(name string) string {
 			if r.UseProtoNames {
@@ -222,7 +224,7 @@ func GetTemplate(r *registry.Registry) *template.Template {
 	return t
 }
 
-func renderURL(method data.Method) string {
+func renderURL(r *registry.Registry, method data.Method) string {
 	url := method.URL
 	reg := regexp.MustCompile("{([^}]+)}")
 	matches := reg.FindAllStringSubmatch(url, -1)
@@ -230,7 +232,12 @@ func renderURL(method data.Method) string {
 		log.Debugf("url matches %v", matches)
 		for _, m := range matches {
 			expToReplace := m[0]
-			fieldName := m[1]
+			var fieldName string
+			if r.UseProtoNames {
+				fieldName = m[1]
+			} else {
+				fieldName = strcase.ToLowerCamel(m[1])
+			}
 			part := fmt.Sprintf(`${req["%s"]}`, fieldName)
 			url = strings.ReplaceAll(url, expToReplace, part)
 		}
