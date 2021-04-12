@@ -1,6 +1,5 @@
 syntax = "proto3";
-option go_package = ".;main";
-
+option go_package = "./;main";
 
 message ExternalRequest {
   string content = 1;
