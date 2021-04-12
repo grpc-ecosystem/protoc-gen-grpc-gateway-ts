@@ -8,6 +8,12 @@ function runTest {
   pid=$!
 
   USE_PROTO_NAMES=$ORIG_NAME ./node_modules/.bin/karma start $CONFIG_NAME
+  TEST_EXIT=$?
+  if [[ $TEST_EXIT -ne 0 ]]; then
+    pkill -P $pid
+    exit $TEST_EXIT
+  fi
+
   pkill -P $pid
 }
 

@@ -28,7 +28,7 @@ describe("test grpc-gateway-ts communication", () => {
   })
 
   it('http get check request', async () => {
-    const result = await CounterService.HTTPGet({num: 10}, {pathPrefix: "http://localhost:8081"})
+    const result = await CounterService.HTTPGet({[getFieldName('num_to_increase')]: 10}, {pathPrefix: "http://localhost:8081"})
     expect(result.result).to.equal(11)
   })
 

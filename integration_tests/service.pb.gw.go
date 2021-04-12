@@ -103,15 +103,15 @@ func request_CounterService_HTTPGet_0(ctx context.Context, marshaler runtime.Mar
 		_   = err
 	)
 
-	val, ok = pathParams["num"]
+	val, ok = pathParams["num_to_increase"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "num")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "num_to_increase")
 	}
 
-	protoReq.Num, err = runtime.Int32(val)
+	protoReq.NumToIncrease, err = runtime.Int32(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "num", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "num_to_increase", err)
 	}
 
 	msg, err := client.HTTPGet(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -130,15 +130,15 @@ func local_request_CounterService_HTTPGet_0(ctx context.Context, marshaler runti
 		_   = err
 	)
 
-	val, ok = pathParams["num"]
+	val, ok = pathParams["num_to_increase"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "num")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "num_to_increase")
 	}
 
-	protoReq.Num, err = runtime.Int32(val)
+	protoReq.NumToIncrease, err = runtime.Int32(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "num", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "num_to_increase", err)
 	}
 
 	msg, err := server.HTTPGet(ctx, &protoReq)
@@ -657,7 +657,7 @@ var (
 
 	pattern_CounterService_StreamingIncrements_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"main.CounterService", "StreamingIncrements"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_CounterService_HTTPGet_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"api", "num"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_CounterService_HTTPGet_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"api", "num_to_increase"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_CounterService_HTTPPostWithNestedBodyPath_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"post", "a"}, "", runtime.AssumeColonVerbOpt(true)))
 
