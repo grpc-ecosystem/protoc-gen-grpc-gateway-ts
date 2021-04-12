@@ -207,36 +207,43 @@ func GetTemplate(r *registry.Registry) *template.Template {
 		"tsType": func(fieldType data.Type) string {
 			return tsType(r, fieldType)
 		},
-		"renderURL":    renderURL,
+		"renderURL":    renderURL(r),
 		"buildInitReq": buildInitReq,
-		"fieldName": func(name string) string {
-			if r.UseProtoNames {
-				return name
-			}
-
-			return strcase.ToLowerCamel(name)
-		},
+		"fieldName":    fieldName(r),
 	})
 
 	t = template.Must(t.Parse(tmpl))
 	return t
 }
 
-func renderURL(method data.Method) string {
-	url := method.URL
-	reg := regexp.MustCompile("{([^}]+)}")
-	matches := reg.FindAllStringSubmatch(url, -1)
-	if len(matches) > 0 {
-		log.Debugf("url matches %v", matches)
-		for _, m := range matches {
-			expToReplace := m[0]
-			fieldName := m[1]
-			part := fmt.Sprintf(`${req["%s"]}`, fieldName)
-			url = strings.ReplaceAll(url, expToReplace, part)
+func fieldName(r *registry.Registry) func(name string) string {
+	return func(name string) string {
+		if r.UseProtoNames {
+			return name
 		}
-	}
 
-	return url
+		return strcase.ToLowerCamel(name)
+	}
+}
+
+func renderURL(r *registry.Registry) func(method data.Method) string {
+	fieldNameFn := fieldName(r)
+	return func(method data.Method) string {
+		url := method.URL
+		reg := regexp.MustCompile("{([^}]+)}")
+		matches := reg.FindAllStringSubmatch(url, -1)
+		if len(matches) > 0 {
+			log.Debugf("url matches %v", matches)
+			for _, m := range matches {
+				expToReplace := m[0]
+				fieldName := fieldNameFn(m[1])
+				part := fmt.Sprintf(`${req["%s"]}`, fieldName)
+				url = strings.ReplaceAll(url, expToReplace, part)
+			}
+		}
+
+		return url
+	}
 }
 
 func buildInitReq(method data.Method) string {

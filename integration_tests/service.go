@@ -40,7 +40,7 @@ func (r *RealCounterService) StreamingIncrements(req *StreamingRequest, service 
 
 func (r *RealCounterService) HTTPGet(ctx context.Context, req *HttpGetRequest) (*HttpGetResponse, error) {
 	return &HttpGetResponse{
-		Result: req.Num + 1,
+		Result: req.NumToIncrease + 1,
 	}, nil
 }
 

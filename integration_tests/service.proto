@@ -22,7 +22,7 @@ message StreamingResponse {
 }
 
 message HttpGetRequest {
-  int32 num = 1;
+  int32 num_to_increase = 1;
 }
 
 message HttpGetResponse {
@@ -47,7 +47,7 @@ service CounterService {
   rpc Increment (UnaryRequest) returns (UnaryResponse);
   rpc StreamingIncrements (StreamingRequest) returns (stream StreamingResponse);
   rpc HTTPGet (HttpGetRequest) returns(HttpGetResponse) {
-    option (google.api.http) = { get: "/api/{num}" };
+    option (google.api.http) = { get: "/api/{num_to_increase}" };
   }
   rpc HTTPPostWithNestedBodyPath (HttpPostRequest) returns(HttpPostResponse) {
     option (google.api.http) = {

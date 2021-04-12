@@ -1,5 +1,4 @@
 #!/bin/bash
-
 source ./scripts/source.sh
 
 CONF="karma.conf.ci.js"
