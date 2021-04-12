@@ -55,3 +55,9 @@ func (r *RealCounterService) HTTPPostWithStarBodyPath(ctx context.Context, in *H
 		PostResult: in.A + in.Req.B + in.C,
 	}, nil
 }
+
+func (r *RealCounterService) HTTPPatch(ctx context.Context, in *HttpPatchRequest) (*HttpPatchResponse, error) {
+	return &HttpPatchResponse{
+		Patch: in.A + in.C,
+	}, nil
+}

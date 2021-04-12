@@ -43,23 +43,40 @@ message HttpPostResponse {
   int32 post_result = 1;
 }
 
+message HttpPatchRequest {
+  int32 a = 1;
+  int32 c = 2;
+}
+
+message HttpPatchResponse {
+  int32 patch_result = 2;
+}
+
 service CounterService {
-  rpc Increment (UnaryRequest) returns (UnaryResponse);
-  rpc StreamingIncrements (StreamingRequest) returns (stream StreamingResponse);
-  rpc HTTPGet (HttpGetRequest) returns(HttpGetResponse) {
-    option (google.api.http) = { get: "/api/{num_to_increase}" };
+  rpc Increment(UnaryRequest) returns (UnaryResponse);
+  rpc StreamingIncrements(StreamingRequest) returns (stream StreamingResponse);
+  rpc HTTPGet(HttpGetRequest) returns (HttpGetResponse) {
+    option (google.api.http) = {
+      get: "/api/{num_to_increase}"
+    };
   }
-  rpc HTTPPostWithNestedBodyPath (HttpPostRequest) returns(HttpPostResponse) {
+  rpc HTTPPostWithNestedBodyPath(HttpPostRequest) returns (HttpPostResponse) {
     option (google.api.http) = {
       post: "/post/{a}"
       body: "req"
     };
   }
-  rpc HTTPPostWithStarBodyPath (HttpPostRequest) returns(HttpPostResponse) {
+  rpc HTTPPostWithStarBodyPath(HttpPostRequest) returns (HttpPostResponse) {
     option (google.api.http) = {
       post: "/post/{a}/{c}"
       body: "*"
     };
   }
-  rpc ExternalMessage (ExternalRequest) returns (ExternalResponse);
+  rpc HTTPPatch(HttpPatchRequest) returns (HttpPatchResponse) {
+    option (google.api.http) = {
+      patch: "/patch"
+      body: "*"
+    };
+  }
+  rpc ExternalMessage(ExternalRequest) returns (ExternalResponse);
 }

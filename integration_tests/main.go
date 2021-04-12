@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"google.golang.org/grpc"
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"google.golang.org/grpc"
 )
 
 // preflightHandler adds the necessary headers in order to serve
@@ -16,7 +17,7 @@ import (
 func preflightHandler(w http.ResponseWriter, r *http.Request) {
 	headers := []string{"Content-Type", "Accept", "Authorization"}
 	w.Header().Set("Access-Control-Allow-Headers", strings.Join(headers, ","))
-	methods := []string{"GET", "HEAD", "POST", "PUT", "DELETE"}
+	methods := []string{"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"}
 	w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
 }
 
