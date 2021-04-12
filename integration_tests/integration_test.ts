@@ -1,8 +1,7 @@
-import {CounterService} from "./service.pb";
-import _ from './empty.pb';
+import { expect } from 'chai';
 import camelCase from 'lodash.camelcase';
-import { pathOr } from 'ramda'
-import {expect} from 'chai'
+import { pathOr } from 'ramda';
+import { CounterService } from "./service.pb";
 
 function getFieldName(name: string) {
   const useCamelCase = pathOr(false, ['__karma__', 'config', 'useProtoNames'], window) === false
@@ -46,6 +45,11 @@ describe("test grpc-gateway-ts communication", () => {
   it('able to communicate with external message reference without package defined', async () => {
     const result = await CounterService.ExternalMessage({ content: "hello" }, {pathPrefix: "http://localhost:8081"})
     expect(getField(result, 'result')).to.equal("hello!!")
+  })
+
+  it('http patch request with star in path', async () => {
+    const result = await CounterService.HTTPPatch({a: 10, c: 23}, {pathPrefix: "http://localhost:8081"})
+    expect(getField(result, 'patch_result')).to.equal(33)
   })
 
 
