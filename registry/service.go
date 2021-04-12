@@ -33,6 +33,8 @@ func getHTTPMethodPath(m *descriptorpb.MethodDescriptorProto) (method, path stri
 		return "POST", rule.GetPost()
 	case *annotations.HttpRule_Put:
 		return "PUT", rule.GetPut()
+	case *annotations.HttpRule_Patch:
+		return "PATCH", rule.GetPatch()
 	case *annotations.HttpRule_Delete:
 		return "DELETE", rule.GetDelete()
 	default:
