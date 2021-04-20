@@ -52,5 +52,9 @@ describe("test grpc-gateway-ts communication", () => {
     expect(getField(result, 'patch_result')).to.equal(33)
   })
 
+  it('http delete check request', async () => {
+    const result = await CounterService.HTTPDelete({a: 10}, {pathPrefix: "http://localhost:8081"})
+    expect(result).to.be.empty
+  })
 
 })

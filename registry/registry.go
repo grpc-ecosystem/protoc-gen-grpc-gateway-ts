@@ -54,6 +54,9 @@ type Registry struct {
 
 	// UseProtoNames will cause the generator to generate field name the same as defined in the proto
 	UseProtoNames bool
+
+	// TSPackages stores the package name keyed by the TS file name
+	TSPackages map[string]string
 }
 
 // NewRegistry initialise the registry and return the instance
@@ -87,6 +90,7 @@ func NewRegistry(paramsMap map[string]string) (*Registry, error) {
 		FetchModuleDirectory: fetchModuleDirectory,
 		FetchModuleFilename:  fetchModuleFilename,
 		UseProtoNames:        useProtoNames,
+		TSPackages:           make(map[string]string),
 	}
 
 	return r, nil
@@ -339,32 +343,37 @@ func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*dat
 				base := fileData.TSFileName
 				target := data.GetTSFileName(typeInfo.File)
 				sourceFile := ""
-				foundAtRoot, alias, err := r.findRootAliasForPath(func(absRoot string) (bool, error) {
-					completePath := filepath.Join(absRoot, typeInfo.File)
-					_, err := os.Stat(completePath)
-					if err != nil {
-						if os.IsNotExist(err) {
-							return false, nil
+				if pkg, ok := r.TSPackages[target]; ok {
+					log.Debugf("package import override %s has been found for file %s", pkg, target)
+					sourceFile = pkg
+				} else {
+					foundAtRoot, alias, err := r.findRootAliasForPath(func(absRoot string) (bool, error) {
+						completePath := filepath.Join(absRoot, typeInfo.File)
+						_, err := os.Stat(completePath)
+						if err != nil {
+							if os.IsNotExist(err) {
+								return false, nil
+							}
+
+							return false, err
+
+						} else {
+							return true, nil
 						}
 
-						return false, err
-
-					} else {
-						return true, nil
+					})
+					if err != nil {
+						return errors.WithStack(err)
 					}
 
-				})
-				if err != nil {
-					return errors.WithStack(err)
-				}
+					if foundAtRoot != "" {
+						target = filepath.Join(foundAtRoot, target)
+					}
 
-				if foundAtRoot != "" {
-					target = filepath.Join(foundAtRoot, target)
-				}
-
-				sourceFile, err = r.getSourceFileForImport(base, target, foundAtRoot, alias)
-				if err != nil {
-					return errors.Wrap(err, "error getting source file for import")
+					sourceFile, err = r.getSourceFileForImport(base, target, foundAtRoot, alias)
+					if err != nil {
+						return errors.Wrap(err, "error getting source file for import")
+					}
 				}
 				dependencies[identifier] = &data.Dependency{
 					ModuleIdentifier: data.GetModuleName(typeInfo.Package, typeInfo.File),
