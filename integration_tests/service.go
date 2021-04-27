@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"time"
+
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type RealCounterService struct{}
@@ -60,4 +62,8 @@ func (r *RealCounterService) HTTPPatch(ctx context.Context, in *HttpPatchRequest
 	return &HttpPatchResponse{
 		PatchResult: in.A + in.C,
 	}, nil
+}
+
+func (r *RealCounterService) HTTPDelete(ctx context.Context, req *HttpDeleteRequest) (*emptypb.Empty, error) {
+	return &emptypb.Empty{}, nil
 }
