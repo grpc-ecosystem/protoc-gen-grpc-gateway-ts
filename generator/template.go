@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 	"text/template"
@@ -195,6 +196,123 @@ function getNotifyEntityArrivalSink<T>(notifyCallback: NotifyStreamEntityArrival
     }
   })
 }
+
+type Primitive = string | boolean | number;
+type RequestPayload = Record<string, unknown>;
+type FlattenedRequestPayload = Record<string, Primitive | Array<Primitive>>;
+
+/**
+ * Checks if given value is a plain object
+ * Logic copied and adapted from below source: 
+ * https://github.com/char0n/ramda-adjunct/blob/master/src/isPlainObj.js
+ * @param  {unknown} value
+ * @return {boolean}
+ */
+function isPlainObject(value: unknown): boolean {
+  const isObject =
+    Object.prototype.toString.call(value).slice(8, -1) === "Object";
+  const isObjLike = value !== null && isObject;
+
+  if (!isObjLike || !isObject) {
+    return false;
+  }
+
+  const proto = Object.getPrototypeOf(value);
+
+  const hasObjectConstructor =
+    typeof proto === "object" &&
+    proto.constructor === Object.prototype.constructor;
+
+  return hasObjectConstructor;
+}
+
+/**
+ * Checks if given value is of a primitive type
+ * @param  {unknown} value
+ * @return {boolean}
+ */
+function isPrimitive(value: unknown): boolean {
+  return ["string", "number", "boolean"].some(t => typeof value === t);
+}
+
+/**
+ * Checks if given primitive is zero-value
+ * @param  {Primitive} value
+ * @return {boolean}
+ */
+function isZeroValuePrimitive(value: Primitive): boolean {
+  return value === false || value === 0 || value === "";
+}
+
+/**
+ * Flattens a deeply nested request payload and returns an object
+ * with only primitive values and non-empty array of primitive values
+ * as per https://github.com/googleapis/googleapis/blob/master/google/api/http.proto
+ * @param  {RequestPayload} requestPayload
+ * @param  {String} path
+ * @return {FlattenedRequestPayload>}
+ */
+function flattenRequestPayload<T extends RequestPayload>(
+  requestPayload: T,
+  path: string = ""
+): FlattenedRequestPayload {
+  return Object.keys(requestPayload).reduce(
+    (acc: T, key: string): T => {
+      const value = requestPayload[key];
+      const newPath = path ? [path, key].join(".") : key;
+
+      const isNonEmptyPrimitiveArray =
+        Array.isArray(value) &&
+        value.every(v => isPrimitive(v)) &&
+        value.length > 0;
+
+      const isNonZeroValuePrimitive =
+        isPrimitive(value) && !isZeroValuePrimitive(value as Primitive);
+
+      let objectToMerge = {};
+
+      if (isPlainObject(value)) {
+        objectToMerge = flattenRequestPayload(value as RequestPayload, newPath);
+      } else if (isNonZeroValuePrimitive || isNonEmptyPrimitiveArray) {
+        objectToMerge = { [newPath]: value };
+      }
+
+      return { ...acc, ...objectToMerge };
+    },
+    {} as T
+  ) as FlattenedRequestPayload;
+}
+
+/**
+ * Renders a deeply nested request payload into a string of URL search
+ * parameters by first flattening the request payload and then removing keys
+ * which are already present in the URL path.
+ * @param  {RequestPayload} requestPayload
+ * @param  {string[]} urlPathParams
+ * @return {string}
+ */
+export function renderURLSearchParams<T extends RequestPayload>(
+  requestPayload: T,
+  urlPathParams: string[] = []
+): string {
+  const flattenedRequestPayload = flattenRequestPayload(requestPayload);
+
+  const urlSearchParams = Object.keys(flattenedRequestPayload).reduce(
+    (acc: string[][], key: string): string[][] => {
+      // key should not be present in the url path as a parameter
+      const value = flattenedRequestPayload[key];
+      if (urlPathParams.find(f => f === key)) {
+        return acc;
+      }
+      return Array.isArray(value)
+        ? [...acc, ...value.map(m => [key, m.toString()])]
+        : (acc = [...acc, [key, value.toString()]]);
+    },
+    [] as string[][]
+  );
+
+  return new URLSearchParams(urlSearchParams).toString();
+}
 `
 
 // GetTemplate gets the templates to for the typescript file
@@ -229,20 +347,39 @@ func fieldName(r *registry.Registry) func(name string) string {
 func renderURL(r *registry.Registry) func(method data.Method) string {
 	fieldNameFn := fieldName(r)
 	return func(method data.Method) string {
-		url := method.URL
+		methodURL := method.URL
 		reg := regexp.MustCompile("{([^}]+)}")
-		matches := reg.FindAllStringSubmatch(url, -1)
+		matches := reg.FindAllStringSubmatch(methodURL, -1)
+		fieldsInPath := make([]string, 0, len(matches))
 		if len(matches) > 0 {
 			log.Debugf("url matches %v", matches)
 			for _, m := range matches {
 				expToReplace := m[0]
 				fieldName := fieldNameFn(m[1])
 				part := fmt.Sprintf(`${req["%s"]}`, fieldName)
-				url = strings.ReplaceAll(url, expToReplace, part)
+				methodURL = strings.ReplaceAll(methodURL, expToReplace, part)
+				fieldsInPath = append(fieldsInPath, fmt.Sprintf(`"%s"`, fieldName))
+			}
+		}
+		urlPathParams := fmt.Sprintf("[%s]", strings.Join(fieldsInPath, ", "))
+
+		if !method.ClientStreaming && method.HTTPMethod == "GET" {
+			// parse the url to check for query string
+			parsedURL, err := url.Parse(methodURL)
+			if err != nil {
+				return methodURL
+			}
+			renderURLSearchParamsFn := fmt.Sprintf("${fm.renderURLSearchParams(req, %s)}", urlPathParams)
+			// prepend "&" if query string is present otherwise prepend "?"
+			// trim leading "&" if present before prepending it
+			if parsedURL.RawQuery != "" {
+				methodURL = strings.TrimRight(methodURL, "&") + "&" + renderURLSearchParamsFn
+			} else {
+				methodURL += "?" + renderURLSearchParamsFn
 			}
 		}
 
-		return url
+		return methodURL
 	}
 }
 
