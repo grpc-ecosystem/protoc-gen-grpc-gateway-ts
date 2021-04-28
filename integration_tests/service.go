@@ -67,3 +67,29 @@ func (r *RealCounterService) HTTPPatch(ctx context.Context, in *HttpPatchRequest
 func (r *RealCounterService) HTTPDelete(ctx context.Context, req *HttpDeleteRequest) (*emptypb.Empty, error) {
 	return &emptypb.Empty{}, nil
 }
+
+func (r *RealCounterService) HTTPGetWithURLSearchParams(ctx context.Context, in *HTTPGetWithURLSearchParamsRequest) (*HTTPGetWithURLSearchParamsResponse, error) {
+	totalC := 0
+	for _, c := range in.GetC() {
+		totalC += int(c)
+	}
+	return &HTTPGetWithURLSearchParamsResponse{
+		UrlSearchParamsResult: in.GetA() + in.PostReq.GetB() + in.ExtMsg.GetD() + int32(totalC),
+	}, nil
+}
+
+func (r *RealCounterService) HTTPGetWithZeroValueURLSearchParams(ctx context.Context, in *HTTPGetWithZeroValueURLSearchParamsRequest) (*HTTPGetWithZeroValueURLSearchParamsResponse, error) {
+	var incrementedD []int32
+	for _, d := range in.ZeroValueMsg.GetD() {
+		incrementedD = append(incrementedD, d+1)
+	}
+	return &HTTPGetWithZeroValueURLSearchParamsResponse{
+		A: in.GetA(),
+		B: in.GetB() + "hello",
+		ZeroValueMsg: &ZeroValueMsg{
+			C: in.ZeroValueMsg.GetC() + 1,
+			D: incrementedD,
+			E: !in.ZeroValueMsg.GetE(),
+		},
+	}, nil
+}

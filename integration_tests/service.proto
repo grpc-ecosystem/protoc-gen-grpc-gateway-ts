@@ -57,6 +57,35 @@ message HttpDeleteRequest {
   int32 a = 1;
 }
 
+message HTTPGetWithURLSearchParamsRequest {
+  int32 a = 1;
+  PostRequest post_req = 2;
+  repeated int32 c = 3;
+  ExternalMessage ext_msg = 4;
+}
+
+message HTTPGetWithURLSearchParamsResponse {
+  int32 url_search_params_result = 1;
+}
+
+message ZeroValueMsg {
+  int32 c = 1;
+  repeated int32 d = 2;
+  bool e = 3;
+}
+
+message HTTPGetWithZeroValueURLSearchParamsRequest {
+  string a = 1;
+  string b = 2;
+  ZeroValueMsg zero_value_msg = 3;
+}
+
+message HTTPGetWithZeroValueURLSearchParamsResponse {
+  string a = 1;
+  string b = 2;
+  ZeroValueMsg zero_value_msg = 3;
+}
+
 service CounterService {
   rpc Increment(UnaryRequest) returns (UnaryResponse);
   rpc StreamingIncrements(StreamingRequest) returns (stream StreamingResponse);
@@ -89,4 +118,15 @@ service CounterService {
     };
   }
   rpc ExternalMessage(ExternalRequest) returns (ExternalResponse);
+  rpc HTTPGetWithURLSearchParams(HTTPGetWithURLSearchParamsRequest) returns (HTTPGetWithURLSearchParamsResponse) {
+    option (google.api.http) = {
+      get: "/api/query/{a}"
+    };
+  }
+  rpc HTTPGetWithZeroValueURLSearchParams(HTTPGetWithZeroValueURLSearchParamsRequest) returns (HTTPGetWithZeroValueURLSearchParamsResponse) {
+    option (google.api.http) = {
+      get: "/path/query"
+    };
+  }
 }
+
