@@ -169,7 +169,7 @@ function getNewLineDelimitedJSONDecodingStream<T>(): TransformStream<string, T> 
       }
       controller.buf += chunk
       while (controller.pos < controller.buf.length) {
-        if (controller.buf[controller.pos] == '\n') {
+        if (controller.buf[controller.pos] === '\n') {
           const line = controller.buf.substring(0, controller.pos)
           const response = JSON.parse(line)
           controller.enqueue(response.result)
