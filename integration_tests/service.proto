@@ -89,6 +89,7 @@ message HTTPGetWithZeroValueURLSearchParamsResponse {
 service CounterService {
   rpc Increment(UnaryRequest) returns (UnaryResponse);
   rpc StreamingIncrements(StreamingRequest) returns (stream StreamingResponse);
+  rpc FailingIncrement(UnaryRequest) returns (UnaryResponse);
   rpc HTTPGet(HttpGetRequest) returns (HttpGetResponse) {
     option (google.api.http) = {
       get: "/api/{num_to_increase}"

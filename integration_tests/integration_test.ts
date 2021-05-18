@@ -19,6 +19,16 @@ describe("test grpc-gateway-ts communication", () => {
     expect(result.result).to.equal(200)
   })
 
+  it("failing unary request", async () => {
+    try {
+      await CounterService.FailingIncrement({ counter: 199 }, { pathPrefix: "http://localhost:8081" }); 
+      expect.fail("expected call to throw");
+    } catch (e) {
+      expect(e).to.have.property("message", "this increment does not work")
+      expect(e).to.have.property("code", 14);
+    }
+  })
+
   it('streaming request', async () => {
     const response = [] as number[]
     await CounterService.StreamingIncrements({ counter: 1 }, (resp) => response.push(resp.result), { pathPrefix: "http://localhost:8081" })

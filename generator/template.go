@@ -99,7 +99,10 @@ export function fetchReq<I, O>(path: string, init?: InitReq): Promise<O> {
 
   const url = pathPrefix ? ` + "`${pathPrefix}${path}`" + ` : path
 
-  return fetch(url, req).then(r => r.json()) as Promise<O>
+  return fetch(url, req).then(r => r.json().then((body: O) => {
+    if (!r.ok) { throw body; }
+    return body;
+  })) as Promise<O>
 }
 
 // NotifyStreamEntityArrival is a callback that will be called on streaming entity arrival
