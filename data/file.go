@@ -26,6 +26,8 @@ type File struct {
 	TSFileName string
 	// PackageNonScalarType stores the type inside the same packages within the file, which will be used to figure out external dependencies inside the same package (different files)
 	PackageNonScalarType []Type
+	// EnableStylingCheck enables the styling check for the given file
+	EnableStylingCheck bool
 }
 
 // StableDependencies are dependencies in a stable order.

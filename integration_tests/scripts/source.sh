@@ -3,7 +3,7 @@
 function runTest {
   ORIG_NAME=${1:="false"}
   CONFIG_NAME=${2:="karma.conf.js"}
-  ./scripts/gen-protos.sh $ORIG_NAME
+  ./scripts/gen-protos.sh $ORIG_NAME true
   go run ./ -orig=$ORIG_NAME &
   pid=$!
 
