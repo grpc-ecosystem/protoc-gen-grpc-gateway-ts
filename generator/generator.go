@@ -18,7 +18,16 @@ import (
 // TypeScriptGRPCGatewayGenerator is the protobuf generator for typescript
 type TypeScriptGRPCGatewayGenerator struct {
 	Registry *registry.Registry
+	// EnableStylingCheck enables both eslint and tsc check for the generated code
+	// This option will only turn on in integration test to ensure the readability in
+	// the generated code.
+	EnableStylingCheck bool
 }
+
+const (
+	// EnableStylingCheckOption is the option name for EnableStylingCheck
+	EnableStylingCheckOption = "enable_styling_check"
+)
 
 // New returns an initialised generator
 func New(paramsMap map[string]string) (*TypeScriptGRPCGatewayGenerator, error) {
@@ -27,8 +36,16 @@ func New(paramsMap map[string]string) (*TypeScriptGRPCGatewayGenerator, error) {
 		return nil, errors.Wrap(err, "error instantiating a new registry")
 	}
 
+	enableStylingCheck := false
+	enableStylingCheckVal, ok := paramsMap[EnableStylingCheckOption]
+	if ok {
+		// default to true if not disabled specifi
+		enableStylingCheck = enableStylingCheckVal == "true"
+	}
+
 	return &TypeScriptGRPCGatewayGenerator{
-		Registry: registry,
+		Registry:           registry,
+		EnableStylingCheck: enableStylingCheck,
 	}, nil
 }
 
@@ -46,6 +63,7 @@ func (t *TypeScriptGRPCGatewayGenerator) Generate(req *plugin.CodeGeneratorReque
 	needToGenerateFetchModule := false
 	// feed fileData into rendering process
 	for _, fileData := range filesData {
+		fileData.EnableStylingCheck = t.EnableStylingCheck
 		if !t.Registry.IsFileToGenerate(fileData.Name) {
 			log.Debugf("file %s is not the file to generate, skipping", fileData.Name)
 			continue
@@ -100,7 +118,7 @@ func (t *TypeScriptGRPCGatewayGenerator) generateFile(fileData *data.File, tmpl 
 func (t *TypeScriptGRPCGatewayGenerator) generateFetchModule(tmpl *template.Template) (*plugin.CodeGeneratorResponse_File, error) {
 	w := bytes.NewBufferString("")
 	fileName := filepath.Join(t.Registry.FetchModuleDirectory, t.Registry.FetchModuleFilename)
-	err := tmpl.Execute(w, nil)
+	err := tmpl.Execute(w, &data.File{EnableStylingCheck: t.EnableStylingCheck})
 	if err != nil {
 		return nil, errors.Wrapf(err, "error generating fetch module at %s", fileName)
 	}

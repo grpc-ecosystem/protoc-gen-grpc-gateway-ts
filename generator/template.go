@@ -66,6 +66,10 @@ export type {{.Name}} = {
 }
 {{end}}{{end}}
 
+{{- if not .EnableStylingCheck}}
+/* eslint-disable */
+// @ts-nocheck
+{{- end}}
 /*
 * This file is a generated Typescript file for GRPC Gateway, DO NOT MODIFY
 */
@@ -86,6 +90,10 @@ type OneOf<T> =
 `
 
 const fetchTmpl = `
+{{- if not .EnableStylingCheck}}
+/* eslint-disable */
+// @ts-nocheck
+{{- end}}
 /*
 * This file is a generated Typescript file for GRPC Gateway, DO NOT MODIFY
 */
