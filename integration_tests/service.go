@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -19,6 +21,10 @@ func (r *RealCounterService) Increment(c context.Context, req *UnaryRequest) (*U
 	return &UnaryResponse{
 		Result: req.Counter + 1,
 	}, nil
+}
+
+func (r *RealCounterService) FailingIncrement(c context.Context, req *UnaryRequest) (*UnaryResponse, error) {
+	return nil, status.Errorf(codes.Unavailable, "this increment does not work")
 }
 
 func (r *RealCounterService) StreamingIncrements(req *StreamingRequest, service CounterService_StreamingIncrementsServer) error {
