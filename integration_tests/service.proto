@@ -14,6 +14,14 @@ message UnaryResponse {
   int32 result = 1;
 }
 
+message BinaryRequest {
+  bytes data = 1;
+}
+
+message BinaryResponse {
+  bytes data = 1;
+}
+
 message StreamingRequest {
   int32 counter = 1;
 }
@@ -90,6 +98,7 @@ service CounterService {
   rpc Increment(UnaryRequest) returns (UnaryResponse);
   rpc StreamingIncrements(StreamingRequest) returns (stream StreamingResponse);
   rpc FailingIncrement(UnaryRequest) returns (UnaryResponse);
+  rpc EchoBinary(BinaryRequest) returns (BinaryResponse);
   rpc HTTPGet(HttpGetRequest) returns (HttpGetResponse) {
     option (google.api.http) = {
       get: "/api/{num_to_increase}"

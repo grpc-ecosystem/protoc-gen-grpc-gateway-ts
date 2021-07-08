@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import camelCase from 'lodash.camelcase';
 import { pathOr } from 'ramda';
 import { CounterService } from "./service.pb";
+import { b64Decode } from './fetch.pb';
 
 function getFieldName(name: string) {
   const useCamelCase = pathOr(false, ['__karma__', 'config', 'useProtoNames'], window) === false
@@ -34,6 +35,17 @@ describe("test grpc-gateway-ts communication", () => {
     await CounterService.StreamingIncrements({ counter: 1 }, (resp) => response.push(resp.result), { pathPrefix: "http://localhost:8081" })
 
     expect(response).to.deep.equal([2, 3, 4, 5, 6])
+  })
+
+  it('binary echo', async () => {
+    const message = "→ ping";
+
+    const resp:any = await CounterService.EchoBinary({
+      data: new TextEncoder().encode(message),
+    }, { pathPrefix: "http://localhost:8081" })
+
+    const bytes = b64Decode(resp["data"])
+    expect(new TextDecoder().decode(bytes)).to.equal(message)
   })
 
   it('http get check request', async () => {
