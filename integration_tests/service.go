@@ -9,7 +9,9 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type RealCounterService struct{}
+type RealCounterService struct {
+	UnimplementedCounterServiceServer
+}
 
 func (r *RealCounterService) ExternalMessage(ctx context.Context, request *ExternalRequest) (*ExternalResponse, error) {
 	return &ExternalResponse{
@@ -25,6 +27,12 @@ func (r *RealCounterService) Increment(c context.Context, req *UnaryRequest) (*U
 
 func (r *RealCounterService) FailingIncrement(c context.Context, req *UnaryRequest) (*UnaryResponse, error) {
 	return nil, status.Errorf(codes.Unavailable, "this increment does not work")
+}
+
+func (r *RealCounterService) EchoBinary(c context.Context, req *BinaryRequest) (*BinaryResponse, error) {
+	return &BinaryResponse{
+		Data: req.Data,
+	}, nil
 }
 
 func (r *RealCounterService) StreamingIncrements(req *StreamingRequest, service CounterService_StreamingIncrementsServer) error {
