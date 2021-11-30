@@ -94,6 +94,14 @@ message HTTPGetWithZeroValueURLSearchParamsResponse {
   ZeroValueMsg zero_value_msg = 3;
 }
 
+message HttpGetRequest2 {
+  string name = 1;
+}
+
+message HttpGetRequest3 {
+  HttpGetRequest2 r = 1;
+}
+
 service CounterService {
   rpc Increment(UnaryRequest) returns (UnaryResponse);
   rpc StreamingIncrements(StreamingRequest) returns (stream StreamingResponse);
@@ -102,6 +110,16 @@ service CounterService {
   rpc HTTPGet(HttpGetRequest) returns (HttpGetResponse) {
     option (google.api.http) = {
       get: "/api/{num_to_increase}"
+    };
+  }
+  rpc HTTPGet2(HttpGetRequest2) returns (HttpGetResponse) {
+    option (google.api.http) = {
+      get: "/api/{name=resource/*}:hello"
+    };
+  }
+  rpc HTTPGet3(HttpGetRequest3) returns (HttpGetResponse) {
+    option (google.api.http) = {
+      get: "/api/{r.name=resource/*}:hello"
     };
   }
   rpc HTTPPostWithNestedBodyPath(HttpPostRequest) returns (HttpPostResponse) {

@@ -464,6 +464,15 @@ func fieldName(r *registry.Registry) func(name string) string {
 	}
 }
 
+func renderParts(fieldName string, fieldNameFn func(name string) string) string {
+	fieldNameParts := strings.Split(fieldName, ".")
+	renderedParts := make([]string, 0, len(fieldNameParts))
+	for _, part := range fieldNameParts {
+		renderedParts = append(renderedParts, fmt.Sprintf(`["%s"]`, fieldNameFn(part)))
+	}
+	return fmt.Sprintf("${req%s}", strings.Join(renderedParts, ""))
+}
+
 func renderURL(r *registry.Registry) func(method data.Method) string {
 	fieldNameFn := fieldName(r)
 	return func(method data.Method) string {
@@ -475,10 +484,11 @@ func renderURL(r *registry.Registry) func(method data.Method) string {
 			log.Debugf("url matches %v", matches)
 			for _, m := range matches {
 				expToReplace := m[0]
-				fieldName := fieldNameFn(m[1])
-				part := fmt.Sprintf(`${req["%s"]}`, fieldName)
+				// cleanup m[1] if the pattern is {fieldname=resources/*}
+				cleanedFieldName := strings.Split(m[1], "=")[0]
+				part := renderParts(cleanedFieldName, fieldNameFn)
 				methodURL = strings.ReplaceAll(methodURL, expToReplace, part)
-				fieldsInPath = append(fieldsInPath, fmt.Sprintf(`"%s"`, fieldName))
+				fieldsInPath = append(fieldsInPath, fmt.Sprintf(`"%s"`, cleanedFieldName))
 			}
 		}
 		urlPathParams := fmt.Sprintf("[%s]", strings.Join(fieldsInPath, ", "))
