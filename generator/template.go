@@ -19,8 +19,12 @@ import (
 
 const tmpl = `
 {{define "dependencies"}}
-{{range .}}import * as {{.ModuleIdentifier}} from "{{.SourceFile}}"
-{{end}}{{end}}
+{{range . -}}
+{{- if isNotWellKnownDeps .SourceFile -}}
+import * as {{.ModuleIdentifier}} from "{{.SourceFile}}"
+{{- end }}
+{{- end}}
+{{end}}
 
 {{define "enums"}}
 {{range .}}export enum {{.Name}} {
@@ -448,6 +452,9 @@ func GetTemplate(r *registry.Registry) *template.Template {
 		"renderURL":    renderURL(r),
 		"buildInitReq": buildInitReq,
 		"fieldName":    fieldName(r),
+		"isNotWellKnownDeps": func(dep string) bool {
+			return !isWellKnownDeps(dep)
+		},
 	})
 
 	t = template.Must(t.Parse(tmpl))
@@ -555,13 +562,14 @@ func tsType(r *registry.Registry, fieldType data.Type) string {
 		return fmt.Sprintf("{[key: %s]: %s}", keyType, valueType)
 	}
 
-	typeStr := ""
-	if strings.Index(info.Type, ".") != 0 {
-		typeStr = mapScalaType(info.Type)
-	} else if !info.IsExternal {
-		typeStr = typeInfo.PackageIdentifier
-	} else {
-		typeStr = data.GetModuleName(typeInfo.Package, typeInfo.File) + "." + typeInfo.PackageIdentifier
+	typeStr := mapWellKnownType(info.Type)
+
+	if typeStr == "" {
+		if !info.IsExternal {
+			typeStr = typeInfo.PackageIdentifier
+		} else {
+			typeStr = data.GetModuleName(typeInfo.Package, typeInfo.File) + "." + typeInfo.PackageIdentifier
+		}
 	}
 
 	if info.IsRepeated {
@@ -570,7 +578,7 @@ func tsType(r *registry.Registry, fieldType data.Type) string {
 	return typeStr
 }
 
-func mapScalaType(protoType string) string {
+func mapWellKnownType(protoType string) string {
 	switch protoType {
 	case "uint64", "sint64", "int64", "fixed64", "sfixed64", "string":
 		return "string"
@@ -580,8 +588,41 @@ func mapScalaType(protoType string) string {
 		return "boolean"
 	case "bytes":
 		return "Uint8Array"
+	case ".google.protobuf.Timestamp":
+		return "string"
+	case ".google.protobuf.Duration":
+		return "string"
+	case ".google.protobuf.Struct":
+		return "unknown"
+	case ".google.protobuf.Value":
+		return "unknown"
+	case ".google.protobuf.ListValue":
+		return "unknown[]"
+	case ".google.protobuf.NullValue":
+		return "null"
+	case ".google.protobuf.FieldMask":
+		return "string[]"
+	case ".google.protobuf.Any":
+		return "unknown"
 	}
-
 	return ""
+}
 
+var (
+	wellKnownDeps = []string{
+		"google/protobuf/duration",
+		"google/protobuf/timestamp",
+		"google/protobuf/struct",
+		"google/protobuf/field_mask",
+		"google/protobuf/any",
+	}
+)
+
+func isWellKnownDeps(dep string) bool {
+	for _, wellKnownDep := range wellKnownDeps {
+		if strings.Contains(dep, wellKnownDep) {
+			return true
+		}
+	}
+	return false
 }
