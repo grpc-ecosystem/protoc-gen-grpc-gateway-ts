@@ -616,8 +616,9 @@ var (
 		"google/protobuf/timestamp",
 		"google/protobuf/struct",
 		"google/protobuf/field_mask",
-		"google/protobuf/any",
 		"google/protobuf/empty",
+		"google/protobuf/any",
+		"../protobuf/any",
 	}
 )
 
