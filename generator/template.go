@@ -144,13 +144,37 @@ func fieldName(r *registry.Registry) func(name string) string {
 	}
 }
 
-func renderParts(fieldName string, fieldNameFn func(name string) string) string {
-	fieldNameParts := strings.Split(fieldName, ".")
-	renderedParts := make([]string, 0, len(fieldNameParts))
-	for _, part := range fieldNameParts {
-		renderedParts = append(renderedParts, fmt.Sprintf(`["%s"]`, fieldNameFn(part)))
+type fieldPartMapFn func(part string) string
+
+func splitFieldName(fieldName string) []string {
+	return strings.Split(fieldName, ".")
+}
+
+func mapFieldName(parts []string, fieldPartMapFns ...fieldPartMapFn) []string {
+	if len(fieldPartMapFns) == 0 {
+		return parts
 	}
-	return fmt.Sprintf("${req%s}", strings.Join(renderedParts, ""))
+	newParts := make([]string, 0, len(parts))
+	for _, fieldName := range parts {
+		newParts = append(newParts, fieldPartMapFns[0](fieldName))
+	}
+	return mapFieldName(newParts, fieldPartMapFns[1:]...)
+}
+
+func renderIndexRequestField(fieldName string, fieldNameFn fieldPartMapFn) string {
+	parts := mapFieldName(splitFieldName(fieldName), fieldNameFn, func(part string) string {
+		return fmt.Sprintf(`["%s"]`, part)
+	})
+	return fmt.Sprintf("req%s", strings.Join(parts, ""))
+}
+
+func renderParts(fieldName string, fieldNameFn fieldPartMapFn) string {
+	return fmt.Sprintf("${%s}", renderIndexRequestField(fieldName, fieldNameFn))
+}
+
+func renderFieldInPath(fieldName string, fieldNameFn fieldPartMapFn) string {
+	parts := mapFieldName(splitFieldName(fieldName), fieldNameFn)
+	return fmt.Sprintf(`"%s"`, strings.Join(parts, "."))
 }
 
 func renderURL(r *registry.Registry) func(method data.Method) string {
@@ -168,7 +192,7 @@ func renderURL(r *registry.Registry) func(method data.Method) string {
 				cleanedFieldName := strings.Split(m[1], "=")[0]
 				part := renderParts(cleanedFieldName, fieldNameFn)
 				methodURL = strings.ReplaceAll(methodURL, expToReplace, part)
-				fieldsInPath = append(fieldsInPath, fmt.Sprintf(`"%s"`, cleanedFieldName))
+				fieldsInPath = append(fieldsInPath, renderFieldInPath(cleanedFieldName, fieldNameFn))
 			}
 		}
 		urlPathParams := fmt.Sprintf("[%s]", strings.Join(fieldsInPath, ", "))
@@ -200,11 +224,10 @@ func buildInitReq(method data.Method) string {
 	if method.HTTPRequestBody == nil || *method.HTTPRequestBody == "*" {
 		fields = append(fields, "body: JSON.stringify(req, fm.replacer)")
 	} else if *method.HTTPRequestBody != "" {
-		fields = append(fields, `body: JSON.stringify(req["`+*method.HTTPRequestBody+`"], fm.replacer)`)
+		field := fmt.Sprintf("body: JSON.stringify(%s, fm.replacer)", renderIndexRequestField(*method.HTTPRequestBody, strcase.ToLowerCamel))
+		fields = append(fields, field)
 	}
-
 	return strings.Join(fields, ", ")
-
 }
 
 // include is the include template functions copied from

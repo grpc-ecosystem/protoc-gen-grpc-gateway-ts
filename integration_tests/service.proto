@@ -48,6 +48,12 @@ message PostRequest {
   int32 b = 1;
 }
 
+message HttpPostRequest2 {
+  int32 a = 1;
+  PostRequest req_camel = 2;
+  int32 c = 3;
+}
+
 message HttpPostResponse {
   int32 post_result = 1;
 }
@@ -99,7 +105,7 @@ message HttpGetRequest2 {
 }
 
 message HttpGetRequest3 {
-  HttpGetRequest2 r = 1;
+  HttpGetRequest2 r_camel = 1;
 }
 
 service CounterService {
@@ -119,7 +125,7 @@ service CounterService {
   }
   rpc HTTPGet3(HttpGetRequest3) returns (HttpGetResponse) {
     option (google.api.http) = {
-      get: "/api/{r.name=resource/*}:hello"
+      get: "/api/{r_camel.name_camel=resource/*}:hello"
     };
   }
   rpc HTTPPostWithNestedBodyPath(HttpPostRequest) returns (HttpPostResponse) {
@@ -132,6 +138,18 @@ service CounterService {
     option (google.api.http) = {
       post: "/post/{a}/{c}"
       body: "*"
+    };
+  }
+  rpc HttpPost2(HttpPostRequest2) returns (HttpPostResponse) {
+    option (google.api.http) = {
+      post: "/post/{a}/{c}"
+      body: "req_camel"
+    };
+  }
+  rpc HttpPost2Nested(HttpPostRequest2) returns (HttpPostResponse) {
+    option (google.api.http) = {
+      post: "/post/{a}/{c}"
+      body: "req_camel.b"
     };
   }
   rpc HTTPPatch(HttpPatchRequest) returns (HttpPatchResponse) {
