@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
-	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus" // nolint: depguard
+	"google.golang.org/protobuf/types/descriptorpb"
+	plugin "google.golang.org/protobuf/types/pluginpb"
 )
 
 const (

@@ -74,6 +74,8 @@ type Field struct {
 	OneOfIndex int32
 	// IsRepeated indicates whether the field is a repeated field
 	IsRepeated bool
+	// JSONName is the name of JSON.
+	JSONName string
 }
 
 // GetType returns some information of the type to aid the rendering

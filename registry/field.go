@@ -1,7 +1,7 @@
 package registry
 
 import (
-	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
+	"google.golang.org/protobuf/types/descriptorpb"
 
 	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
 )
@@ -60,6 +60,7 @@ func (r *Registry) analyseField(fileData *data.File, msgData *data.Message, pack
 		IsExternal:   isExternal,
 		IsOneOfField: f.OneofIndex != nil,
 		Message:      msgData,
+		JSONName:     f.GetJsonName(),
 	}
 
 	if f.Label != nil {

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"text/template"
 
-	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	log "github.com/sirupsen/logrus" // nolint: depguard
+	plugin "google.golang.org/protobuf/types/pluginpb"
 
 	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
 	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/registry"
@@ -21,6 +21,7 @@ type TypeScriptGRPCGatewayGenerator struct {
 	// This option will only turn on in integration test to ensure the readability in
 	// the generated code.
 	EnableStylingCheck bool
+	TmplPath           string
 }
 
 const (
@@ -42,9 +43,15 @@ func New(paramsMap map[string]string) (*TypeScriptGRPCGatewayGenerator, error) {
 		enableStylingCheck = enableStylingCheckVal == "true"
 	}
 
+	tmplPath, ok := paramsMap["template"]
+	if !ok {
+		tmplPath = "gateway-ts.go.tpl"
+	}
+
 	return &TypeScriptGRPCGatewayGenerator{
 		Registry:           registry,
 		EnableStylingCheck: enableStylingCheck,
+		TmplPath:           tmplPath,
 	}, nil
 }
 
@@ -56,7 +63,7 @@ func (t *TypeScriptGRPCGatewayGenerator) Generate(req *plugin.CodeGeneratorReque
 	if err != nil {
 		return nil, errors.Wrap(err, "error analysing proto files")
 	}
-	tmpl := GetTemplate(t.Registry)
+	tmpl := GetTemplate(t.Registry, t.TmplPath)
 	log.Debugf("files to generate %v", req.GetFileToGenerate())
 
 	// feed fileData into rendering process
