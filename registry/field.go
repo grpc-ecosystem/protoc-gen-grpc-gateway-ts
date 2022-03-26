@@ -49,7 +49,7 @@ func (r *Registry) getFieldType(f *descriptorpb.FieldDescriptorProto) string {
 	return typeName
 }
 
-func (r *Registry) analyseField(fileData *data.File, msgData *data.Message, packageName string, f *descriptorpb.FieldDescriptorProto) {
+func (r *Registry) analyseField(fileData *data.File, msgData *data.Message, packageName string, f *descriptorpb.FieldDescriptorProto, commentInfo *CommentInfo) {
 	fqTypeName := r.getFieldType(f)
 
 	isExternal := r.isExternalDependenciesOutsidePackage(fqTypeName, packageName)
@@ -61,6 +61,7 @@ func (r *Registry) analyseField(fileData *data.File, msgData *data.Message, pack
 		IsOneOfField: f.OneofIndex != nil,
 		Message:      msgData,
 		JSONName:     f.GetJsonName(),
+		Comment:      commentInfo.GetText(),
 	}
 
 	if f.Label != nil {

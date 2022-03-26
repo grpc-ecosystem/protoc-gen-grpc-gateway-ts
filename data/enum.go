@@ -11,13 +11,22 @@ type Enum struct {
 	// Due to the fact that Protos allows alias fields which is not a feature
 	// in Typescript, it's better to use string representation of it.
 	// So Values here will basically be the name of the field.
-	Values []string
+	Values []*EnumValue
+	// Comment is the comment of the enum
+	Comment string
+}
+
+// EnumValue is the data out to render a value in a enum.
+type EnumValue struct {
+	Name    string
+	Comment string
 }
 
 // NewEnum creates an enum instance.
 func NewEnum() *Enum {
 	return &Enum{
-		Name:   "",
-		Values: make([]string, 0),
+		Name:    "",
+		Values:  make([]*EnumValue, 0),
+		Comment: "",
 	}
 }

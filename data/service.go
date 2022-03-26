@@ -6,6 +6,8 @@ type Service struct {
 	Name string
 	// Methods is a list of methods data
 	Methods []*Method
+	// Comment is the comment of the Service
+	Comment string
 }
 
 // Services is an alias of Service array
@@ -66,6 +68,8 @@ type Method struct {
 	HTTPMethod string
 	// HTTPBody is the path for request body in the body's payload
 	HTTPRequestBody *string
+	// Comment is the comment of the Method
+	Comment string
 }
 
 // MethodArgument stores the type information about method argument

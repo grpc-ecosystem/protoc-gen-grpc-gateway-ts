@@ -20,6 +20,8 @@ type Message struct {
 	OneOfFieldsGroups map[int32][]*Field
 	// OneOfFieldNames is the names of one of fields with same index. so that renderer can render the clearing of other fields on set.
 	OneOfFieldsNames map[int32]string
+	// Comment is the comment of the message.
+	Comment string
 }
 
 // HasOneOfFields returns true when the message has a one of field.
@@ -37,6 +39,7 @@ func NewMessage() *Message {
 		Messages:          make([]*Message, 0),
 		OneOfFieldsGroups: make(map[int32][]*Field),
 		OneOfFieldsNames:  make(map[int32]string),
+		Comment:           "",
 	}
 }
 
@@ -76,6 +79,8 @@ type Field struct {
 	IsRepeated bool
 	// JSONName is the name of JSON.
 	JSONName string
+	// Comment is the comment of the field
+	Comment string
 }
 
 // GetType returns some information of the type to aid the rendering

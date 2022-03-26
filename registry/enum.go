@@ -6,7 +6,12 @@ import (
 	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
 )
 
-func (r *Registry) analyseEnumType(fileData *data.File, packageName, fileName string, parents []string, enum *descriptorpb.EnumDescriptorProto) {
+const (
+	// enumDescriptorValueFieldNumber is the field number of the field EnumDescriptorProro.value
+	enumDescriptorValueFieldNumber = 2
+)
+
+func (r *Registry) analyseEnumType(fileData *data.File, packageName, fileName string, parents []string, enum *descriptorpb.EnumDescriptorProto, commentInfo *CommentInfo) {
 	packageIdentifier := r.getNameOfPackageLevelIdentifier(parents, enum.GetName())
 	fqName := r.getFullQualifiedName(packageName, parents, enum.GetName())
 	protoType := descriptorpb.FieldDescriptorProto_TYPE_ENUM
@@ -21,11 +26,15 @@ func (r *Registry) analyseEnumType(fileData *data.File, packageName, fileName st
 
 	enumData := data.NewEnum()
 	enumData.Name = packageIdentifier
+	enumData.Comment = commentInfo.GetText()
 
-	for _, e := range enum.GetValue() {
-		enumData.Values = append(enumData.Values, e.GetName())
+	for i, e := range enum.GetValue() {
+		value := &data.EnumValue{
+			Name:    e.GetName(),
+			Comment: commentInfo.GetSubComment(enumDescriptorValueFieldNumber, i).GetText(),
+		}
+		enumData.Values = append(enumData.Values, value)
 	}
 
 	fileData.Enums = append(fileData.Enums, enumData)
-
 }

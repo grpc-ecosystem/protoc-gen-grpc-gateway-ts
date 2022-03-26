@@ -12,6 +12,15 @@ import (
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
+const (
+	// fileDescriptorEnumTypeFieldNumber is the field number of FileDescriptor.message_type
+	fileDescriptorMessageTypeFieldNumber = 4
+	// fileDescriptorEnumTypeFieldNumber is the field number of FileDescriptor.enum_type
+	fileDescriptorEnumTypeFieldNumber = 5
+	// fileDescriptorServiceFieldNumber is the field number of FileDescriptor.service
+	fileDescriptorServiceFieldNumber = 6
+)
+
 func (r *Registry) analyseFile(f *descriptorpb.FileDescriptorProto) (*data.File, error) {
 	log.Debugf("analysing %s", f.GetName())
 	fileData := data.NewFile()
@@ -24,19 +33,29 @@ func (r *Registry) analyseFile(f *descriptorpb.FileDescriptorProto) (*data.File,
 		r.TSPackages[fileData.TSFileName] = proto.GetExtension(f.Options, options.E_TsPackage).(string)
 	}
 
+	commentInfo := &CommentInfo{}
+	for _, location := range f.GetSourceCodeInfo().GetLocation() {
+		if location.LeadingComments != nil || location.TrailingComments != nil || len(location.LeadingDetachedComments) > 0 {
+			commentInfo.AddLocation(location)
+		}
+	}
+
 	// analyse enums
-	for _, enum := range f.EnumType {
-		r.analyseEnumType(fileData, packageName, fileName, parents, enum)
+	for i, enum := range f.EnumType {
+		r.analyseEnumType(fileData, packageName, fileName, parents, enum,
+			commentInfo.GetSubComment(fileDescriptorEnumTypeFieldNumber, i))
 	}
 
 	// analyse messages, each message will go recursively
-	for _, message := range f.MessageType {
-		r.analyseMessage(fileData, packageName, fileName, parents, message)
+	for i, message := range f.MessageType {
+		r.analyseMessage(fileData, packageName, fileName, parents, message,
+			commentInfo.GetSubComment(fileDescriptorMessageTypeFieldNumber, i))
 	}
 
 	// analyse services
-	for _, service := range f.Service {
-		r.analyseService(fileData, packageName, fileName, service)
+	for i, service := range f.Service {
+		r.analyseService(fileData, packageName, fileName, service,
+			commentInfo.GetSubComment(fileDescriptorServiceFieldNumber, i))
 	}
 
 	// add fetch module after analysed all services in the file. will add dependencies if there is any

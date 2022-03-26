@@ -10,6 +10,10 @@ import (
 	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
 )
 
+const (
+	serviceDescriptorMethodFieldNumber = 2
+)
+
 func getHTTPAnnotation(m *descriptorpb.MethodDescriptorProto) *annotations.HttpRule {
 	option := proto.GetExtension(m.GetOptions(), annotations.E_Http)
 	return option.(*annotations.HttpRule)
@@ -58,7 +62,7 @@ func getHTTPBody(m *descriptorpb.MethodDescriptorProto) *string {
 	}
 }
 
-func (r *Registry) analyseService(fileData *data.File, packageName string, fileName string, service *descriptorpb.ServiceDescriptorProto) {
+func (r *Registry) analyseService(fileData *data.File, packageName string, fileName string, service *descriptorpb.ServiceDescriptorProto, commentInfo *CommentInfo) {
 	packageIdentifier := service.GetName()
 	fqName := "." + packageName + "." + packageIdentifier
 
@@ -73,9 +77,10 @@ func (r *Registry) analyseService(fileData *data.File, packageName string, fileN
 
 	serviceData := data.NewService()
 	serviceData.Name = service.GetName()
+	serviceData.Comment = commentInfo.GetText()
 	serviceURLPart := packageName + "." + serviceData.Name
 
-	for _, method := range service.Method {
+	for i, method := range service.Method {
 		// don't support client streaming, will ignore the client streaming method
 		if method.GetClientStreaming() {
 			continue
@@ -121,6 +126,7 @@ func (r *Registry) analyseService(fileData *data.File, packageName string, fileN
 			ClientStreaming: method.GetClientStreaming(),
 			HTTPMethod:      httpMethod,
 			HTTPRequestBody: body,
+			Comment:         commentInfo.GetSubComment(serviceDescriptorMethodFieldNumber, i).GetText(),
 		}
 
 		fileData.TrackPackageNonScalarType(methodData.Input)
