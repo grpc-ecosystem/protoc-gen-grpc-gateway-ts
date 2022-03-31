@@ -468,7 +468,10 @@ func renderURL(r *registry.Registry) func(method data.Method) string {
 	fieldNameFn := fieldName(r)
 	return func(method data.Method) string {
 		methodURL := method.URL
-		// capture fields like {abc} or {abc=def/ghi/*}. Discard the pattern after the equal sign.
+		// capture fields like {abc} or {abc=def/ghi/*}.
+		// discard the pattern after the equal sign.
+		// relies on greedy capture within first part
+		// to avoid matching 2nd group when no equal sign present.
 		reg := regexp.MustCompile("{([^=}]+)=?([^}]+)?}")
 		matches := reg.FindAllStringSubmatch(methodURL, -1)
 		fieldsInPath := make([]string, 0, len(matches))
@@ -485,7 +488,7 @@ func renderURL(r *registry.Registry) func(method data.Method) string {
 					partNames = append(partNames, fmt.Sprintf(`["%s"]`, subFieldName))
 				}
 				fieldName := strings.Join(subFieldNames, ".")
-				part := fmt.Sprintf(`${req%s}`, strings.Join(partNames, ""))
+				part := fmt.Sprintf(`${req%s}`, strings.Join(partNames, "?."))
 				methodURL = strings.ReplaceAll(methodURL, expToReplace, part)
 				fieldsInPath = append(fieldsInPath, fmt.Sprintf(`"%s"`, fieldName))
 			}
