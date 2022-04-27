@@ -19,6 +19,7 @@ type Enum struct {
 // EnumValue is the data out to render a value in a enum.
 type EnumValue struct {
 	Name    string
+	Number  int32
 	Comment string
 }
 
