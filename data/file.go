@@ -106,7 +106,7 @@ func GetTSFileName(fileName string) string {
 	baseName := filepath.Base(fileName)
 	ext := filepath.Ext(fileName)
 	name := baseName[0 : len(baseName)-len(ext)]
-	return path.Join(filepath.Dir(fileName), name+".pb.ts")
+	return filepath.ToSlash(path.Join(filepath.Dir(fileName), name+".pb.ts"))
 }
 
 // Type is an interface to get type out of field and method arguments
