@@ -36,10 +36,10 @@ jobs:
         uses: arduino/setup-protoc@v1
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
-          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v1.33
+          # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
+          version: v1.29
 
       # Runs a single command using the runners shell
       - name: Get go dependencies
