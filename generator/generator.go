@@ -117,7 +117,7 @@ func (t *TypeScriptGRPCGatewayGenerator) generateFile(fileData *data.File, tmpl 
 
 func (t *TypeScriptGRPCGatewayGenerator) generateFetchModule(tmpl *template.Template) (*plugin.CodeGeneratorResponse_File, error) {
 	w := bytes.NewBufferString("")
-	fileName := filepath.Join(t.Registry.FetchModuleDirectory, t.Registry.FetchModuleFilename)
+	fileName := filepath.ToSlash(filepath.Join(t.Registry.FetchModuleDirectory, t.Registry.FetchModuleFilename))
 	err := tmpl.Execute(w, &data.File{EnableStylingCheck: t.EnableStylingCheck})
 	if err != nil {
 		return nil, errors.Wrapf(err, "error generating fetch module at %s", fileName)
