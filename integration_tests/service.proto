@@ -94,6 +94,27 @@ message HTTPGetWithZeroValueURLSearchParamsResponse {
   ZeroValueMsg zero_value_msg = 3;
 }
 
+message HTTPGetWithPathSegmentsRequest {
+  string a = 1;
+}
+
+message HTTPGetWithPathSegmentsResponse {
+  string a = 1;
+}
+
+message HTTPPostWithFieldPathRequest {
+  message SubMessage {
+    int32 x = 21;
+    string nested_value = 22;
+  }
+  SubMessage y = 23;
+}
+
+message HTTPPostWithFieldPathResponse {
+  int32 xout = 11;
+  string yout = 12;
+}
+
 service CounterService {
   rpc Increment(UnaryRequest) returns (UnaryResponse);
   rpc StreamingIncrements(StreamingRequest) returns (stream StreamingResponse);
@@ -136,6 +157,23 @@ service CounterService {
   rpc HTTPGetWithZeroValueURLSearchParams(HTTPGetWithZeroValueURLSearchParamsRequest) returns (HTTPGetWithZeroValueURLSearchParamsResponse) {
     option (google.api.http) = {
       get: "/path/query"
+    };
+  }
+  rpc HTTPGetWithPathSegments(HTTPGetWithPathSegmentsRequest) returns (HTTPGetWithPathSegmentsResponse) {
+    option (google.api.http) = {
+      get: "/getsegment/{a=segmented/*}"
+    };
+  }
+  rpc HTTPPostWithFieldPath(HTTPPostWithFieldPathRequest) returns (HTTPPostWithFieldPathResponse) {
+    option (google.api.http) = {
+      post: "/postpath/{y.nested_value}"
+      body: "y"
+    };
+  }
+  rpc HTTPPostWithFieldPathAndSegments(HTTPPostWithFieldPathRequest) returns (HTTPPostWithFieldPathResponse) {
+    option (google.api.http) = {
+      post: "/postpathsegment/{y.nested_value=segmented/*}"
+      body: "y"
     };
   }
 }
