@@ -195,10 +195,6 @@ export function b64Decode(s: string): Uint8Array {
   return new Uint8Array(buffer);
 }
 
-function b64Test(s: string): boolean {
-	return /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(s);
-}
-
 export interface InitReq extends RequestInit {
   pathPrefix?: string
 }
