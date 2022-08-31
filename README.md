@@ -41,6 +41,9 @@ Turn on logging to stderr. Default to false.
 ### `loglevel`
 Defines the logging levels. Default to info. Valid values are: debug, info, warn, error
 
+### enable_styling_check
+Enables eslint and tsc checks in generated files. Default to false.
+
 ### Notes:
 Zero-value fields are omitted from the URL query parameter list for GET requests. Therefore for a request payload such as `{ a: "A", b: "" c: 1, d: 0, e: false }` will become `/path/query?a=A&c=1`. A sample implementation is present within this [proto file](https://github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/blob/master/integration_tests/service.proto) in the`integration_tests` folder. For further explanation please read the following:
 - <https://developers.google.com/protocol-buffers/docs/proto3#default>
