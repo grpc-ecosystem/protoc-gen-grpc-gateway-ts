@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/iancoleman/strcase"
 )
 
 // File store the information about rendering a file
@@ -85,20 +87,16 @@ type Dependency struct {
 	SourceFile string
 }
 
-// GetModuleName returns module name = package name + file name to be the unique identifier for source file in a ts file
+// GetModuleName returns module name = package name + base file name to be the
+// unique identifier for source file in a ts file. Package name and base file
+// name are converted to camel case, special characters like dot, dash and
+// underscore are removed.
 func GetModuleName(packageName, fileName string) string {
 	baseName := filepath.Base(fileName)
 	ext := filepath.Ext(fileName)
 	name := baseName[0 : len(baseName)-len(ext)]
-	packageParts := strings.Split(packageName, ".")
 
-	if packageName != "" {
-		for i, p := range packageParts {
-			packageParts[i] = strings.ToUpper(p[:1]) + p[1:]
-		}
-	}
-
-	return strings.Join(packageParts, "") + strings.ToUpper(name[:1]) + name[1:]
+	return strcase.ToCamel(packageName) + strcase.ToCamel(name)
 }
 
 // GetTSFileName gets the typescript filename out of the proto file name

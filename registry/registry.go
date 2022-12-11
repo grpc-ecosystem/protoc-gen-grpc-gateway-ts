@@ -336,7 +336,7 @@ func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*dat
 
 			if _, ok := dependencies[identifier]; !ok {
 				// only fill in if this file has not been mentioned before.
-				// the way import in the genrated file works is like
+				// the way import in the generated file works is like
 				// import * as [ModuleIdentifier] from '[Source File]'
 				// so there only needs to be added once.
 				// Referencing types will be [ModuleIdentifier].[PackageIdentifier]
