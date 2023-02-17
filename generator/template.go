@@ -13,8 +13,8 @@ import (
 	"github.com/Masterminds/sprig"
 	"github.com/iancoleman/strcase"
 
-	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
-	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/registry"
+	"github.com/h2oai/protoc-gen-grpc-gateway-ts/data"
+	"github.com/h2oai/protoc-gen-grpc-gateway-ts/registry"
 )
 
 const tmpl = `
@@ -39,9 +39,11 @@ type Base{{.Name}} = {
 {{- end}}
 }
 
-export type {{.Name}} = Base{{.Name}}
-{{range $groupId, $fields := .OneOfFieldsGroups}}  & OneOf<{ {{range $index, $field := $fields}}{{fieldName $field.Name}}: {{tsType $field}}{{if (lt (add $index 1) (len $fields))}}; {{end}}{{end}} }>
+export type {{.Name}} = Base{{.Name}} & {
+{{range $groupId, $fields := .OneOfFieldsGroups}} 
+  {{range $index, $field := $fields}}{{fieldName $field.Name}}?: {{tsType $field}}{{if (lt (add $index 1) (len $fields))}}; {{end}}
 {{end}}
+}
 {{- else -}}
 export type {{.Name}} = {
 {{- range .Fields}}
