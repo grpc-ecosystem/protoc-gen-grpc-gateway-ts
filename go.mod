@@ -1,4 +1,4 @@
-module github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts
+module github.com/h2oai/protoc-gen-grpc-gateway-ts
 
 go 1.14
 

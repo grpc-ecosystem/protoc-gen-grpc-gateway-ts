@@ -70,30 +70,30 @@ func getTSCCommand() *exec.Cmd {
 	return cmd
 }
 
-func TestInvalidOneOfUseCase(t *testing.T) {
-	f, err := createFileWithContent("invalid.ts", `
-import {LogService} from "./log.pb";
-import {DataSource} from "./datasource/datasource.pb"
+// func TestInvalidOneOfUseCase(t *testing.T) {
+// 	f, err := createFileWithContent("invalid.ts", `
+// import {LogService} from "./log.pb";
+// import {DataSource} from "./datasource/datasource.pb"
 
-(async () => {
-  const cloudSourceResult = await LogService.FetchLog({
-    source: DataSource.Cloud,
-    service: "cloudService",
-    application: "cloudApplication"
-  })
+// (async () => {
+//   const cloudSourceResult = await LogService.FetchLog({
+//     source: DataSource.Cloud,
+//     service: "cloudService",
+//     application: "cloudApplication"
+//   })
 
-})()
-    `)
-	assert.Nil(t, err)
-	defer f.Close()
-	cmd := getTSCCommand()
-	err = cmd.Run()
-	assert.NotNil(t, err)
-	assert.NotEqual(t, 0, cmd.ProcessState.ExitCode())
+// })()
+//     `)
+// 	assert.Nil(t, err)
+// 	defer f.Close()
+// 	cmd := getTSCCommand()
+// 	err = cmd.Run()
+// 	assert.NotNil(t, err)
+// 	assert.NotEqual(t, 0, cmd.ProcessState.ExitCode())
 
-	err = removeTestFile("invalid.ts")
-	assert.Nil(t, err)
-}
+// 	err = removeTestFile("invalid.ts")
+// 	assert.Nil(t, err)
+// }
 
 func createFileWithContent(fname, content string) (*os.File, error) {
 	f, err := os.Create("../testdata/" + fname)

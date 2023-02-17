@@ -9,6 +9,7 @@ import (
 
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	log "github.com/sirupsen/logrus" // nolint: depguard
+	"google.golang.org/protobuf/types/pluginpb"
 
 	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
 	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/registry"
@@ -89,6 +90,9 @@ func (t *TypeScriptGRPCGatewayGenerator) Generate(req *plugin.CodeGeneratorReque
 
 		resp.File = append(resp.File, generatedFetch)
 	}
+
+	var features = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
+	resp.SupportedFeatures = &features
 
 	return resp, nil
 }

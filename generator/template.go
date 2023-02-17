@@ -39,9 +39,11 @@ type Base{{.Name}} = {
 {{- end}}
 }
 
-export type {{.Name}} = Base{{.Name}}
-{{range $groupId, $fields := .OneOfFieldsGroups}}  & OneOf<{ {{range $index, $field := $fields}}{{fieldName $field.Name}}: {{tsType $field}}{{if (lt (add $index 1) (len $fields))}}; {{end}}{{end}} }>
+export type {{.Name}} = Base{{.Name}} & {
+{{range $groupId, $fields := .OneOfFieldsGroups}} 
+  {{range $index, $field := $fields}}{{fieldName $field.Name}}?: {{tsType $field}}{{if (lt (add $index 1) (len $fields))}}; {{end}}
 {{end}}
+}
 {{- else -}}
 export type {{.Name}} = {
 {{- range .Fields}}
