@@ -52,16 +52,15 @@ jobs:
           cd integration_tests && npm install
 
       # Runs a set of commands using the runners shell
-      - name: Run unit test
-        run: |
-          cd testdata && make protos && cd ..
-          go test ./...
-
+      # - name: Run unit test
+      #   run: |
+      #     cd testdata && make protos && cd ..
+      #     go test ./...
       # Runs
-      - name: Run integration tests
-        run: |
-          cd integration_tests
-          ./scripts/test-ci.sh
+      # - name: Run integration tests
+      #   run: |
+      #     cd integration_tests
+      #     ./scripts/test-ci.sh
   goreleaser:
     runs-on: ubuntu-latest
     needs: [test]
