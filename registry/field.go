@@ -3,7 +3,7 @@ package registry
 import (
 	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 
-	"github.com/h2oai/protoc-gen-grpc-gateway-ts/data"
+	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
 )
 
 // getFieldType generates an intermediate type and leave the rendering logic to choose what to render

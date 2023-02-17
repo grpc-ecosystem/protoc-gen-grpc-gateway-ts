@@ -11,8 +11,8 @@ import (
 	log "github.com/sirupsen/logrus" // nolint: depguard
 	"google.golang.org/protobuf/types/pluginpb"
 
-	"github.com/h2oai/protoc-gen-grpc-gateway-ts/data"
-	"github.com/h2oai/protoc-gen-grpc-gateway-ts/registry"
+	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
+	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/registry"
 	"github.com/pkg/errors"
 )
 

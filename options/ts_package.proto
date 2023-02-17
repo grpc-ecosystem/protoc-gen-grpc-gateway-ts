@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package grpc.gateway.protoc_gen_grpc_gateway_ts.options;
 
-option go_package = "github.com/h2oai/protoc-gen-grpc-gateway-ts/options";
+option go_package = "github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/options";
 
 import "google/protobuf/descriptor.proto";
 

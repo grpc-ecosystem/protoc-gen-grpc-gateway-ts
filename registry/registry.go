@@ -8,7 +8,7 @@ import (
 
 	descriptorpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
-	"github.com/h2oai/protoc-gen-grpc-gateway-ts/data"
+	"github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts/data"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus" // nolint: depguard
 )
