@@ -2,7 +2,7 @@
 
 `protoc-gen-grpc-gateway-ts` is a TypeScript client generator for the [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway/) project. It generates idiomatic TypeScript clients that connect the web frontend and golang backend fronted by grpc-gateway.
 
-## Features: 
+## Features:
 1. Idiomatic Typescript clients and messages.
 2. Supports both one way and server side streaming gRPC calls.
 3. POJO request construction guarded by message type definitions, which is way easier compare to `grpc-web`.
