@@ -468,15 +468,27 @@ func renderURL(r *registry.Registry) func(method data.Method) string {
 	fieldNameFn := fieldName(r)
 	return func(method data.Method) string {
 		methodURL := method.URL
-		reg := regexp.MustCompile("{([^}]+)}")
+		// capture fields like {abc} or {abc=def/ghi/*}.
+		// discard the pattern after the equal sign.
+		// relies on greedy capture within first part
+		// to avoid matching 2nd group when no equal sign present.
+		reg := regexp.MustCompile("{([^=}]+)=?([^}]+)?}")
 		matches := reg.FindAllStringSubmatch(methodURL, -1)
 		fieldsInPath := make([]string, 0, len(matches))
 		if len(matches) > 0 {
 			log.Debugf("url matches %v", matches)
 			for _, m := range matches {
 				expToReplace := m[0]
-				fieldName := fieldNameFn(m[1])
-				part := fmt.Sprintf(`${req["%s"]}`, fieldName)
+				// convert foo_bar.baz_qux to fieldName `fooBar.bazQux`, part `${req["fooBar"]["bazQux"]}`
+				subFields := strings.Split(m[1], ".")
+				var subFieldNames, partNames []string
+				for _, subField := range subFields {
+					subFieldName := fieldNameFn(subField)
+					subFieldNames = append(subFieldNames, subFieldName)
+					partNames = append(partNames, fmt.Sprintf(`["%s"]`, subFieldName))
+				}
+				fieldName := strings.Join(subFieldNames, ".")
+				part := fmt.Sprintf(`${req%s}`, strings.Join(partNames, "?."))
 				methodURL = strings.ReplaceAll(methodURL, expToReplace, part)
 				fieldsInPath = append(fieldsInPath, fmt.Sprintf(`"%s"`, fieldName))
 			}

@@ -107,3 +107,23 @@ func (r *RealCounterService) HTTPGetWithZeroValueURLSearchParams(ctx context.Con
 		},
 	}, nil
 }
+
+func (r *RealCounterService) HTTPGetWithPathSegments(ctx context.Context, in *HTTPGetWithPathSegmentsRequest) (*HTTPGetWithPathSegmentsResponse, error) {
+	return &HTTPGetWithPathSegmentsResponse{
+		A: in.GetA() + "/hello",
+	}, nil
+}
+
+func (r *RealCounterService) HTTPPostWithFieldPath(ctx context.Context, in *HTTPPostWithFieldPathRequest) (*HTTPPostWithFieldPathResponse, error) {
+	return &HTTPPostWithFieldPathResponse{
+		Xout: in.GetY().GetX(),
+		Yout: "hello/" + in.GetY().GetNestedValue(),
+	}, nil
+}
+
+func (r *RealCounterService) HTTPPostWithFieldPathAndSegments(ctx context.Context, in *HTTPPostWithFieldPathRequest) (*HTTPPostWithFieldPathResponse, error) {
+	return &HTTPPostWithFieldPathResponse{
+		Xout: in.GetY().GetX(),
+		Yout: "hello/" + in.GetY().GetNestedValue(),
+	}, nil
+}
