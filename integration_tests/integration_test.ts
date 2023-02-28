@@ -22,7 +22,7 @@ describe("test grpc-gateway-ts communication", () => {
 
   it("failing unary request", async () => {
     try {
-      await CounterService.FailingIncrement({ counter: 199 }, { pathPrefix: "http://localhost:8081" }); 
+      await CounterService.FailingIncrement({ counter: 199 }, { pathPrefix: "http://localhost:8081" });
       expect.fail("expected call to throw");
     } catch (e) {
       expect(e).to.have.property("message", "this increment does not work")
@@ -77,7 +77,7 @@ describe("test grpc-gateway-ts communication", () => {
     const result = await CounterService.HTTPDelete({ a: 10 }, { pathPrefix: "http://localhost:8081" })
     expect(result).to.be.empty
   })
-    
+
   it('http get request with url search parameters', async () => {
     const result = await CounterService.HTTPGetWithURLSearchParams({ a: 10, [getFieldName('post_req')]: { b: 0 }, c: [23, 25], [getFieldName('ext_msg')]: { d: 12 } }, { pathPrefix: "http://localhost:8081" })
     expect(getField(result, 'url_search_params_result')).to.equal(70)
@@ -86,5 +86,20 @@ describe("test grpc-gateway-ts communication", () => {
   it('http get request with zero value url search parameters', async () => {
     const result = await CounterService.HTTPGetWithZeroValueURLSearchParams({ a: "A", b: "", [getFieldName('zero_value_msg')]: { c: 1, d: [1, 0, 2], e: false } }, { pathPrefix: "http://localhost:8081" })
     expect(result).to.deep.equal({ a: "A", b: "hello", [getFieldName('zero_value_msg')]: { c: 2, d: [2, 1, 3], e: true } })
+  })
+
+  it('http get request with path segments', async () => {
+    const result = await CounterService.HTTPGetWithPathSegments({ a: "segmented/foo" }, { pathPrefix: "http://localhost:8081" })
+    expect(result.a).to.equal("segmented/foo/hello")
+  })
+
+  it('http post with field paths', async () => {
+    const result = await CounterService.HTTPPostWithFieldPath({ y: { x: 5, [getFieldName("nested_value")]: "foo" } }, { pathPrefix: "http://localhost:8081" })
+    expect(result).to.deep.equal({ xout: 5, yout: "hello/foo" })
+  })
+
+  it('http post with field paths and path segments', async () => {
+    const result = await CounterService.HTTPPostWithFieldPathAndSegments({ y: { x: 10, [getFieldName("nested_value")]: "segmented/foo" } }, { pathPrefix: "http://localhost:8081" })
+    expect(result).to.deep.equal({ xout: 10, yout: "hello/segmented/foo" })
   })
 })
