@@ -546,7 +546,9 @@ func tsType(r *registry.Registry, fieldType data.Type) string {
 	}
 
 	typeStr := ""
-	if strings.Index(info.Type, ".") != 0 {
+	if mapWellKnownType(info.Type) != "" {
+		typeStr = mapWellKnownType(info.Type)
+	} else if strings.Index(info.Type, ".") != 0 {
 		typeStr = mapScalaType(info.Type)
 	} else if !info.IsExternal {
 		typeStr = typeInfo.PackageIdentifier
@@ -558,6 +560,24 @@ func tsType(r *registry.Registry, fieldType data.Type) string {
 		typeStr += "[]"
 	}
 	return typeStr
+}
+
+func mapWellKnownType(protoType string) string {
+	switch protoType {
+	case ".google.protobuf.BoolValue":
+		return "boolean | undefined"
+	case ".google.protobuf.StringValue":
+		return "string | undefined"
+	case ".google.protobuf.DoubleValue",
+		".google.protobuf.FloatValue",
+		".google.protobuf.Int32Value",
+		".google.protobuf.Int64Value",
+		".google.protobuf.UInt32Value",
+		".google.protobuf.UInt64Value":
+		return "number | undefined"
+	}
+
+	return ""
 }
 
 func mapScalaType(protoType string) string {
