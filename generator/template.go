@@ -356,15 +356,6 @@ function isPrimitive(value: unknown): boolean {
 }
 
 /**
- * Checks if given primitive is zero-value
- * @param  {Primitive} value
- * @return {boolean}
- */
-function isZeroValuePrimitive(value: Primitive): boolean {
-  return value === false || value === 0 || value === "";
-}
-
-/**
  * Flattens a deeply nested request payload and returns an object
  * with only primitive values and non-empty array of primitive values
  * as per https://github.com/googleapis/googleapis/blob/master/google/api/http.proto
@@ -386,14 +377,11 @@ function flattenRequestPayload<T extends RequestPayload>(
         value.every(v => isPrimitive(v)) &&
         value.length > 0;
 
-      const isNonZeroValuePrimitive =
-        isPrimitive(value) && !isZeroValuePrimitive(value as Primitive);
-
       let objectToMerge = {};
 
       if (isPlainObject(value)) {
         objectToMerge = flattenRequestPayload(value as RequestPayload, newPath);
-      } else if (isNonZeroValuePrimitive || isNonEmptyPrimitiveArray) {
+      } else if (isPrimitive(value) || isNonEmptyPrimitiveArray) {
         objectToMerge = { [newPath]: value };
       }
 
