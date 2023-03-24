@@ -356,15 +356,6 @@ function isPrimitive(value: unknown): boolean {
 }
 
 /**
- * Checks if given primitive is zero-value
- * @param  {Primitive} value
- * @return {boolean}
- */
-function isZeroValuePrimitive(value: Primitive): boolean {
-  return value === false || value === 0 || value === "";
-}
-
-/**
  * Flattens a deeply nested request payload and returns an object
  * with only primitive values and non-empty array of primitive values
  * as per https://github.com/googleapis/googleapis/blob/master/google/api/http.proto
@@ -386,14 +377,11 @@ function flattenRequestPayload<T extends RequestPayload>(
         value.every(v => isPrimitive(v)) &&
         value.length > 0;
 
-      const isNonZeroValuePrimitive =
-        isPrimitive(value) && !isZeroValuePrimitive(value as Primitive);
-
       let objectToMerge = {};
 
       if (isPlainObject(value)) {
         objectToMerge = flattenRequestPayload(value as RequestPayload, newPath);
-      } else if (isNonZeroValuePrimitive || isNonEmptyPrimitiveArray) {
+      } else if (isPrimitive(value) || isNonEmptyPrimitiveArray) {
         objectToMerge = { [newPath]: value };
       }
 
@@ -546,7 +534,9 @@ func tsType(r *registry.Registry, fieldType data.Type) string {
 	}
 
 	typeStr := ""
-	if strings.Index(info.Type, ".") != 0 {
+	if mapWellKnownType(info.Type) != "" {
+		typeStr = mapWellKnownType(info.Type)
+	} else if strings.Index(info.Type, ".") != 0 {
 		typeStr = mapScalaType(info.Type)
 	} else if !info.IsExternal {
 		typeStr = typeInfo.PackageIdentifier
@@ -558,6 +548,24 @@ func tsType(r *registry.Registry, fieldType data.Type) string {
 		typeStr += "[]"
 	}
 	return typeStr
+}
+
+func mapWellKnownType(protoType string) string {
+	switch protoType {
+	case ".google.protobuf.BoolValue":
+		return "boolean | undefined"
+	case ".google.protobuf.StringValue":
+		return "string | undefined"
+	case ".google.protobuf.DoubleValue",
+		".google.protobuf.FloatValue",
+		".google.protobuf.Int32Value",
+		".google.protobuf.Int64Value",
+		".google.protobuf.UInt32Value",
+		".google.protobuf.UInt64Value":
+		return "number | undefined"
+	}
+
+	return ""
 }
 
 func mapScalaType(protoType string) string {

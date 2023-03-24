@@ -332,6 +332,11 @@ func (r *Registry) collectExternalDependenciesFromData(filesData map[string]*dat
 			if !ok {
 				return errors.Errorf("cannot find type info for %s, $v", typeName)
 			}
+			if typeInfo.File == "google/protobuf/wrappers.proto" {
+				// Skip well-known wrapper types without importing them as an external dependency,
+				// since their types are converted to native TypeScript types by mapWellKnownType.
+				continue
+			}
 			identifier := typeInfo.Package + "|" + typeInfo.File
 
 			if _, ok := dependencies[identifier]; !ok {
